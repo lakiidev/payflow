@@ -1,9 +1,8 @@
 spring:
   datasource:
-    primary:
-      url: jdbc:postgresql://localhost:5432/payflow
-      username: ${DB_USER}
-      password: ${DB_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/payflow
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
   data:
     redis:
       host: localhost
