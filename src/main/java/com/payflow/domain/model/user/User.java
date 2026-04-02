@@ -32,7 +32,7 @@ public class User {
     private String fullName;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column
     private UserStatus status;
 
     @CreationTimestamp
