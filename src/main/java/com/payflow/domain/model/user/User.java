@@ -32,6 +32,7 @@ public class User {
     private String fullName;
 
     @Enumerated(EnumType.STRING)
+    @Column
     private UserStatus status;
 
     @CreationTimestamp

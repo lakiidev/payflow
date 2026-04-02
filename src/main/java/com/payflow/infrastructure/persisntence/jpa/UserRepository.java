@@ -1,4 +1,4 @@
-package com.payflow.infrastructure.persisntence.jpa;
+package com.payflow.infrastructure.persistence.jpa;
 
 import com.payflow.domain.model.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;

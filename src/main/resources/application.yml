@@ -27,8 +27,8 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
 payflow:
   outbox:
-  poll-interval-ms: 500
-  batch-size: 100
+    poll-interval-ms: 500
+    batch-size: 100
 
 app:
   jwt:
