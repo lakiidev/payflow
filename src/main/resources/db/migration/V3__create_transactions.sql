@@ -20,4 +20,3 @@ CREATE INDEX idx_tx_from_wallet ON transactions (from_wallet_id);
 CREATE INDEX idx_tx_to_wallet ON transactions (to_wallet_id);
 CREATE INDEX idx_tx_status ON transactions (status);
 CREATE INDEX idx_tx_created_at ON transactions (created_at DESC);
-CREATE INDEX idx_tx_idempotency ON transactions (idempotency_key);
