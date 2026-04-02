@@ -20,15 +20,15 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
-        group-id: payflow-${spring.profiles.active}
-        enable-auto-commit: false
-        auto-offset-reset: earliest
-        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-        value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-  payflow:
-    outbox:
-      poll-interval-ms: 500
-      batch-size: 100
+      group-id: payflow-${spring.profiles.active}
+      enable-auto-commit: false
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+payflow:
+  outbox:
+  poll-interval-ms: 500
+  batch-size: 100
 
 app:
   jwt:
