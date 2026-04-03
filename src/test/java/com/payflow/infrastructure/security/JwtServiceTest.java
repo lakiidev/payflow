@@ -1,0 +1,60 @@
+package com.payflow.infrastructure.security;
+
+import com.payflow.domain.model.user.User;
+import com.payflow.domain.model.user.UserStatus;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import static org.assertj.core.api.Assertions.assertThat;
+import java.util.Date;
+import io.jsonwebtoken.Jwts;
+import org.springframework.test.util.ReflectionTestUtils;
+import static org.junit.jupiter.api.Assertions.*;
+
+
+class JwtServiceTest {
+
+    private JwtService jwtService;
+
+    private UserDetails userDetails;
+
+    @BeforeEach
+    void setUp() {
+        jwtService = new JwtService();
+        ReflectionTestUtils.setField(jwtService, "jwtSecret",
+                "dGVzdC1zZWNyZXQta2V5LW11c3QtYmUtYXQtbGVhc3QtMjU2LWJpdHMtbG9uZwo=");
+        ReflectionTestUtils.setField(jwtService, "jwtExpiration", 900000L);
+
+        userDetails = User.builder()
+                .email("test@payflow.com")
+                .passwordHash("hashed")
+                .fullName("Test User")
+                .status(UserStatus.ACTIVE)
+                .build();
+    }
+
+    @Test
+    void shouldGenerateValidTokenAndExtractUsername() {
+        String token = jwtService.generateAccessToken(userDetails);
+
+        assertThat(jwtService.validateToken(token, userDetails)).isTrue();
+        assertThat(jwtService.extractUsername(token)).isEqualTo("test@payflow.com");
+    }
+
+    @Test
+    void shouldReturnFalseForTamperedToken() {
+        String token = jwtService.generateAccessToken(userDetails);
+        String tampered = token.substring(0, token.length() - 5) + "XXXXX";
+
+        assertThat(jwtService.validateToken(tampered, userDetails)).isFalse();
+    }
+
+    @Test
+    void shouldReturnFalseForExpiredToken() {
+        ReflectionTestUtils.setField(jwtService, "jwtExpiration", -1000L);
+        String token = jwtService.generateAccessToken(userDetails);
+
+        assertThat(jwtService.validateToken(token, userDetails)).isFalse();
+    }
+}
