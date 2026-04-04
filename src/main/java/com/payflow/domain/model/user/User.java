@@ -38,7 +38,6 @@ public class User implements UserDetails {
     private String fullName;
 
     @Enumerated(EnumType.STRING)
-    @Column
     private UserStatus status;
 
     @CreationTimestamp
@@ -69,7 +68,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return status != UserStatus.SUSPENDED;
     }
 
     @Override
@@ -79,6 +78,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return status == UserStatus.ACTIVE;
     }
 }

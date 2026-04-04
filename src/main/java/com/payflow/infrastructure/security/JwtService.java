@@ -21,6 +21,8 @@ public class JwtService {
     private String jwtSecret;
     @Value("${app.jwt.expiration}")
     private long jwtExpiration;
+    @Value("${app.jwt.refresh-expiration}")
+    private long jwtRefreshExpiration;
 
     public String generateAccessToken(UserDetails userDetails) {
         return generateAccessToken(Map.of(), userDetails);
@@ -35,6 +37,15 @@ public class JwtService {
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis()+jwtExpiration))
                 .signWith(getSignInKey(), Jwts.SIG.HS256).compact();
+    }
+
+    public String generateRefreshToken(UserDetails userDetails) {
+        return Jwts.builder()
+                .subject(userDetails.getUsername())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + jwtRefreshExpiration))
+                .signWith(getSignInKey(), Jwts.SIG.HS256)
+                .compact();
     }
 
     public boolean validateToken(String token, UserDetails userDetails) {
@@ -54,6 +65,8 @@ public class JwtService {
         Date expiration = extractExpiration(token);
         return expiration == null || expiration.before(new Date());
     }
+
+
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
