@@ -1,4 +1,4 @@
-package com.payflow.application.query.walelt;
+package com.payflow.application.query.wallet;
 
 import com.payflow.api.dto.response.WalletResponse;
 import com.payflow.domain.model.wallet.Wallet;

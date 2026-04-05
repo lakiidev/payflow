@@ -1,4 +1,4 @@
-package com.payflow.application.query.walelt;
+package com.payflow.application.query.wallet;
 
 import java.util.UUID;
 

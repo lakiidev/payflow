@@ -1,9 +1,9 @@
 package com.payflow.api.controller;
 
 import com.payflow.api.dto.response.WalletResponse;
-import com.payflow.application.query.walelt.GetWalletByIdQuery;
-import com.payflow.application.query.walelt.WalletQuery;
-import com.payflow.application.query.walelt.WalletQueryHandler;
+import com.payflow.application.query.wallet.GetWalletByIdQuery;
+import com.payflow.application.query.wallet.WalletQuery;
+import com.payflow.application.query.wallet.WalletQueryHandler;
 import com.payflow.domain.model.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
