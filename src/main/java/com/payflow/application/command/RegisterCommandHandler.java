@@ -5,6 +5,7 @@ import com.payflow.domain.model.user.User;
 import com.payflow.domain.model.user.UserStatus;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.infrastructure.persistence.jpa.UserRepository;
+import com.payflow.infrastructure.persistence.jpa.WalletRepository;
 import com.payflow.infrastructure.security.JwtService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import java.util.Currency;
 public class RegisterCommandHandler {
 
     private final UserRepository userRepository;
+    private final WalletRepository walletRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
@@ -36,7 +38,7 @@ public class RegisterCommandHandler {
         userRepository.save(user);
 
         Wallet wallet = Wallet.create(user.getId(), Currency.getInstance("GBP"));
-
+        walletRepository.save(wallet);
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         return AuthenticationResponse.builder()
