@@ -10,5 +10,5 @@ import java.util.UUID;
 
 public interface WalletRepository extends JpaRepository<Wallet, UUID> {
     Optional<Wallet> findByUserIdAndCurrency(UUID userId, Currency currency);
-    List<Wallet> findAllByUserId(UUID id);
+    List<Wallet> findAllByUserId(UUID userId);
 }
