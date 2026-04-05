@@ -3,6 +3,7 @@ package com.payflow.domain.model.user;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -13,7 +14,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import java.util.Collection;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User implements UserDetails {
+    @Getter
     @Id
     @UuidGenerator
     private UUID id;
@@ -41,10 +43,10 @@ public class User implements UserDetails {
     private UserStatus status;
 
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    private Instant  createdAt;
 
     @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
