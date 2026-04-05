@@ -30,7 +30,7 @@ public class Wallet {
     private BigDecimal currentBalance;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 50)
     private WalletStatus status;
 
     @Version
