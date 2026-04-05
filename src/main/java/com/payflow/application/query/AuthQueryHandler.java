@@ -1,7 +1,7 @@
 package com.payflow.application.query;
 
 
-import com.payflow.api.dto.response.AuthentciationResponse;
+import com.payflow.api.dto.response.AuthenticationResponse;
 import com.payflow.domain.model.user.User;
 import com.payflow.infrastructure.persistence.jpa.UserRepository;
 import com.payflow.infrastructure.security.JwtService;
@@ -22,7 +22,7 @@ public class AuthQueryHandler {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
-    public AuthentciationResponse handle(AuthQuery query)
+    public AuthenticationResponse handle(AuthQuery query)
     {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 query.email(),
@@ -32,14 +32,14 @@ public class AuthQueryHandler {
                 new UsernameNotFoundException("User not found: "+ query.email()));
         String accessToken= jwtService.generateAccessToken(user);
         String refreshToken= jwtService.generateRefreshToken(user);
-        return AuthentciationResponse.builder()
+        return AuthenticationResponse.builder()
                 .email(user.getUsername())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
     }
 
-    public AuthentciationResponse handleRefresh(String refreshToken)
+    public AuthenticationResponse handleRefresh(String refreshToken)
     {
         String email = jwtService.extractUsername(refreshToken);
         if(email==null)
@@ -52,6 +52,6 @@ public class AuthQueryHandler {
         }
         String newAccessToken = jwtService.generateAccessToken(userDetails);
         String newRefreshToken = jwtService.generateRefreshToken(userDetails);
-        return AuthentciationResponse.builder().email(userDetails.getUsername()).accessToken(newAccessToken).refreshToken(newRefreshToken).build();
+        return AuthenticationResponse.builder().email(userDetails.getUsername()).accessToken(newAccessToken).refreshToken(newRefreshToken).build();
     }
 }

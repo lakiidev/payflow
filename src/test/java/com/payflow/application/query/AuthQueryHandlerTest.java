@@ -1,6 +1,6 @@
 package com.payflow.application.query;
 
-import com.payflow.api.dto.response.AuthentciationResponse;
+import com.payflow.api.dto.response.AuthenticationResponse;
 import com.payflow.domain.model.user.User;
 import com.payflow.domain.model.user.UserStatus;
 import com.payflow.infrastructure.persistence.jpa.UserRepository;
@@ -13,10 +13,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -57,7 +59,7 @@ class AuthQueryHandlerTest {
         when(jwtService.generateRefreshToken(any())).thenReturn("refresh-token");
 
         // When
-        AuthentciationResponse response = handler.handle(query);
+        AuthenticationResponse response = handler.handle(query);
 
         // Then
         assertThat(response.getAccessToken()).isEqualTo("access-token");
@@ -84,7 +86,7 @@ class AuthQueryHandlerTest {
         when(jwtService.generateRefreshToken(any())).thenReturn("new-refresh-token");
 
         // When
-        AuthentciationResponse response = handler.handleRefresh(oldRefreshToken);
+        AuthenticationResponse response = handler.handleRefresh(oldRefreshToken);
 
         // Then
         assertThat(response.getAccessToken()).isEqualTo("new-access-token");
@@ -102,5 +104,38 @@ class AuthQueryHandlerTest {
         // When + Then
         assertThrows(BadCredentialsException.class,
                 () -> handler.handleRefresh(invalidToken));
+    }
+
+    @Test
+    void shouldThrowWhenRefreshTokenExpired() {
+        // Given
+        String expiredToken = "expired-refresh-token";
+        String email = "test@payflow.com";
+        User user = User.builder()
+                .email(email)
+                .passwordHash("hashed")
+                .fullName("Test User")
+                .status(UserStatus.ACTIVE)
+                .build();
+
+        when(jwtService.extractUsername(expiredToken)).thenReturn(email);
+        when(userDetailsService.loadUserByUsername(email)).thenReturn(user);
+        when(jwtService.validateToken(expiredToken, user)).thenReturn(false);
+
+        // When + Then
+        assertThatThrownBy(() -> handler.handleRefresh(expiredToken))
+                .isInstanceOf(BadCredentialsException.class);
+    }
+
+    @Test
+    void shouldThrowWhenUserNotFoundDuringLogin() {
+        // Given
+        AuthQuery query = new AuthQuery("unknown@payflow.com", "password123");
+
+        when(userRepository.findByEmail(query.email())).thenReturn(Optional.empty());
+
+        // When + Then
+        assertThatThrownBy(() -> handler.handle(query))
+                .isInstanceOf(UsernameNotFoundException.class);
     }
 }

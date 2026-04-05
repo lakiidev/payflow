@@ -1,6 +1,6 @@
 package com.payflow.application.command;
 
-import com.payflow.api.dto.response.AuthentciationResponse;
+import com.payflow.api.dto.response.AuthenticationResponse;
 import com.payflow.domain.model.user.User;
 import com.payflow.domain.model.user.UserStatus;
 import com.payflow.infrastructure.persistence.jpa.UserRepository;
@@ -20,7 +20,7 @@ public class RegisterCommandHandler {
     private final JwtService jwtService;
 
     @Transactional // For future use, convention wise atm
-    public AuthentciationResponse handle(RegisterCommand command) {
+    public AuthenticationResponse handle(RegisterCommand command) {
         if (userRepository.existsByEmail(command.email())) {
             throw new BadCredentialsException(command.email());
         }
@@ -33,7 +33,7 @@ public class RegisterCommandHandler {
         userRepository.save(user);
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
-        return AuthentciationResponse.builder()
+        return AuthenticationResponse.builder()
                 .email(user.getUsername())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)

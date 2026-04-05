@@ -1,9 +1,9 @@
-package com.payflow.api.contoller;
+package com.payflow.api.controller;
 
 import com.payflow.api.dto.request.LoginRequest;
 import com.payflow.api.dto.request.RefreshRequest;
 import com.payflow.api.dto.request.RegisterRequest;
-import com.payflow.api.dto.response.AuthentciationResponse;
+import com.payflow.api.dto.response.AuthenticationResponse;
 import com.payflow.application.command.RegisterCommand;
 import com.payflow.application.command.RegisterCommandHandler;
 import com.payflow.application.query.AuthQuery;
@@ -21,9 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final RegisterCommandHandler registerCommandHandler;
-    private final AuthQueryHandler authentificationQueryHandler;
+    private final AuthQueryHandler authenticationQueryHandler ;
     @PostMapping("/register")
-    public AuthentciationResponse register(
+    public AuthenticationResponse register(
         @Valid @RequestBody RegisterRequest request
     ){
         return registerCommandHandler.handle(new RegisterCommand(
@@ -34,14 +34,14 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public AuthentciationResponse login(@Valid @RequestBody LoginRequest request){
-        return  authentificationQueryHandler.handle(new AuthQuery(
+    public AuthenticationResponse login(@Valid @RequestBody LoginRequest request){
+        return  authenticationQueryHandler.handle(new AuthQuery(
                 request.getEmail(),
                 request.getPassword()
         ));
     }
     @PostMapping("/refresh")
-    public AuthentciationResponse refresh(@RequestBody RefreshRequest request) {
-        return authentificationQueryHandler.handleRefresh(request.getRefreshToken());
+    public AuthenticationResponse refresh(@Valid @RequestBody RefreshRequest request) {
+        return authenticationQueryHandler.handleRefresh(request.getRefreshToken());
     }
 }
