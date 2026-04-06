@@ -34,7 +34,7 @@ jobs:
           cache: maven
 
       - name: Build and test
-        run: mvn verify
+        run: ./mvnw verify
         env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/payflow
           SPRING_DATASOURCE_USERNAME: ${{ secrets.DB_USERNAME }}
