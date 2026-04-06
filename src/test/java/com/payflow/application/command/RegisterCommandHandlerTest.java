@@ -2,7 +2,9 @@ package com.payflow.application.command;
 
 import com.payflow.api.dto.response.AuthenticationResponse;
 import com.payflow.domain.model.user.User;
+import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.infrastructure.persistence.jpa.UserRepository;
+import com.payflow.infrastructure.persistence.jpa.WalletRepository;
 import com.payflow.infrastructure.security.JwtService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +28,9 @@ class RegisterCommandHandlerTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private WalletRepository walletRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -57,6 +62,7 @@ class RegisterCommandHandlerTest {
         assertThat(response.getRefreshToken()).isEqualTo("refresh-token");
         assertThat(response.getEmail()).isEqualTo("test@payflow.com");
         verify(userRepository).save(any(User.class));
+        verify(walletRepository).save(any(Wallet.class));
         verify(passwordEncoder).encode("password123");
     }
 
