@@ -22,7 +22,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final UserRepository repository;
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
 

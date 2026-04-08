@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/payflow
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
+    username: ${DB_USER:dev}
+    password: ${DB_PASSWORD:dev}
     driver-class-name: org.postgresql.Driver
   data:
     redis:
@@ -19,3 +19,7 @@ logging:
   level:
     com.payflow: DEBUG
     org.hibernate.SQL: DEBUG
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:bG9jYWwtZGV2LXNlY3JldC1rZXktbXVzdC1iZS1hdC1sZWFzdC0yNTYtYml0cy1sb25n}

@@ -1,6 +1,7 @@
 package com.payflow.application.command;
 
 import com.payflow.api.dto.response.AuthenticationResponse;
+import com.payflow.domain.model.user.EmailAlreadyRegisteredException;
 import com.payflow.domain.model.user.User;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.infrastructure.persistence.jpa.UserRepository;
@@ -13,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import org.springframework.security.authentication.BadCredentialsException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -78,7 +78,7 @@ class RegisterCommandHandlerTest {
         when(userRepository.existsByEmail(command.email())).thenReturn(true);
 
         assertThatThrownBy(() -> handler.handle(command))
-                .isInstanceOf(BadCredentialsException.class);
+                .isInstanceOf(EmailAlreadyRegisteredException.class);
 
         verify(userRepository, never()).save(any(User.class));
         verify(passwordEncoder, never()).encode(any());

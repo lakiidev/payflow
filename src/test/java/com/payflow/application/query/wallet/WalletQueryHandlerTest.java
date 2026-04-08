@@ -28,7 +28,7 @@ class WalletQueryHandlerTest {
     WalletQueryHandler walletQueryHandler;
 
     @Test
-    void handle_shouldThrowWhenWalletNotFound() {
+    void shouldThrowWhenWalletNotFound() {
         // Given
         when(walletRepository.findById(any())).thenReturn(Optional.empty());
 
@@ -39,7 +39,7 @@ class WalletQueryHandlerTest {
     }
 
     @Test
-    void handle_shouldThrowWhenWalletBelongsToDifferentUser() {
+    void shouldThrowWhenWalletBelongsToDifferentUser() {
         // Given
         Wallet wallet = Wallet.create(UUID.randomUUID(), Currency.getInstance("EUR"));
         when(walletRepository.findById(any())).thenReturn(Optional.of(wallet));
