@@ -10,25 +10,31 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class WalletQueryHandler {
+
+    public record ListQuery(UUID userId) {}
+    public record GetByIdQuery(UUID walletId, UUID requestingUserId) {}
+
     private final WalletRepository walletRepository;
 
     @Transactional(readOnly = true)
-    public List<WalletResponse> handle(WalletQuery query) {
+    public List<WalletResponse> handle(ListQuery query) {
         return walletRepository.findAllByUserId(query.userId())
                 .stream()
                 .map(WalletResponse::from)
                 .toList();
     }
+
     @Transactional(readOnly = true)
-    public WalletResponse handle(GetWalletByIdQuery query) {
+    public WalletResponse handle(GetByIdQuery query) {
         Wallet wallet = walletRepository.findById(query.walletId()).orElseThrow(
                 () -> new WalletNotFoundException(query.walletId())
         );
-        if(!wallet.getUserId().equals(query.requestingUserId())) {
+        if (!wallet.getUserId().equals(query.requestingUserId())) {
             throw new WalletAccessDeniedException(query.requestingUserId());
         }
         return WalletResponse.from(wallet);

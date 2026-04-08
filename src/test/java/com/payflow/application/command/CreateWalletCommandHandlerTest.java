@@ -35,7 +35,7 @@ class CreateWalletCommandHandlerTest {
         UUID userId = UUID.randomUUID();
         when(walletRepository.findByUserIdAndCurrency(userId, EUR)).thenReturn(Optional.empty());
 
-        WalletResponse response = handler.handle(new CreateWalletCommand(userId, EUR));
+        WalletResponse response = handler.handle(new CreateWalletCommandHandler.Command(userId, EUR));
 
         assertThat(response.currency()).isEqualTo(EUR);
         assertThat(response.balance()).isZero();
@@ -48,7 +48,7 @@ class CreateWalletCommandHandlerTest {
         Wallet existing = Wallet.create(userId, EUR);
         when(walletRepository.findByUserIdAndCurrency(userId, EUR)).thenReturn(Optional.of(existing));
 
-        assertThatThrownBy(() -> handler.handle(new CreateWalletCommand(userId, EUR)))
+        assertThatThrownBy(() -> handler.handle(new CreateWalletCommandHandler.Command(userId, EUR)))
                 .isInstanceOf(WalletAlreadyExistsException.class);
 
         verify(walletRepository, never()).save(any());

@@ -45,7 +45,7 @@ class AuthQueryHandlerTest {
     @Test
     void shouldLoginAndReturnTokens() {
         // Given
-        AuthQuery query = new AuthQuery("test@payflow.com", "password123");
+        AuthQueryHandler.Query query = new AuthQueryHandler.Query("test@payflow.com", "password123");
 
         User user = User.builder()
                 .email("test@payflow.com")
@@ -130,7 +130,7 @@ class AuthQueryHandlerTest {
     @Test
     void shouldThrowWhenUserNotFoundDuringLogin() {
         // Given
-        AuthQuery query = new AuthQuery("unknown@payflow.com", "password123");
+        AuthQueryHandler.Query query = new AuthQueryHandler.Query("unknown@payflow.com", "password123");
 
         when(userRepository.findByEmail(query.email())).thenReturn(Optional.empty());
 

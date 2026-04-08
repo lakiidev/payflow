@@ -17,7 +17,7 @@ class LogoutCommandHandlerTest {
 
     @Test
     void shouldCompleteWithoutErrorForValidCommand() {
-        LogoutCommand command = new LogoutCommand(UUID.randomUUID(), "some.jwt.token");
+        LogoutCommand command = new LogoutCommandHandler.Command(UUID.randomUUID(), "some.jwt.token");
 
         assertThatCode(() -> handler.handle(command)).doesNotThrowAnyException();
     }
@@ -25,7 +25,7 @@ class LogoutCommandHandlerTest {
     @Test
     void shouldCompleteWithoutErrorWhenTokenJtiIsNull() {
         // Valid for Week 1 — jti is unused until Week 3 Redis denylist
-        LogoutCommand command = new LogoutCommand(UUID.randomUUID(), null);
+        LogoutCommand command = new LogoutCommandHandler.Command(UUID.randomUUID(), null);
 
         assertThatCode(() -> handler.handle(command)).doesNotThrowAnyException();
     }

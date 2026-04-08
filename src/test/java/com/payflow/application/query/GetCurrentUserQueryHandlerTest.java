@@ -36,7 +36,7 @@ class GetCurrentUserQueryHandlerTest {
                 .build();
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        UserProfileResponse response = handler.handle(new GetCurrentUserQuery(userId));
+        UserProfileResponse response = handler.handle(new GetCurrentUserQueryHandler.Query(userId));
 
         assertThat(response.email()).isEqualTo("user@payflow.com");
         assertThat(response.fullName()).isEqualTo("Test User");
@@ -47,7 +47,7 @@ class GetCurrentUserQueryHandlerTest {
         UUID userId = UUID.randomUUID();
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> handler.handle(new GetCurrentUserQuery(userId)))
+        assertThatThrownBy(() -> handler.handle(new GetCurrentUserQueryHandler.Query(userId)))
                 .isInstanceOf(UsernameNotFoundException.class);
     }
 }

@@ -35,7 +35,7 @@ class FreezeWalletCommandHandlerTest {
         Wallet wallet = Wallet.create(userId, Currency.getInstance("GBP"));
         when(walletRepository.findById(wallet.getId())).thenReturn(Optional.of(wallet));
 
-        handler.handle(new FreezeWalletCommand(wallet.getId(), userId));
+        handler.handle(new FreezeWalletCommandHandler.Command(wallet.getId(), userId));
 
         assertThat(wallet.getStatus()).isEqualTo(WalletStatus.FROZEN);
         verify(walletRepository).save(wallet);
@@ -46,7 +46,7 @@ class FreezeWalletCommandHandlerTest {
         UUID walletId = UUID.randomUUID();
         when(walletRepository.findById(walletId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> handler.handle(new FreezeWalletCommand(walletId, UUID.randomUUID())))
+        assertThatThrownBy(() -> handler.handle(new FreezeWalletCommandHandler.Command(walletId, UUID.randomUUID())))
                 .isInstanceOf(WalletNotFoundException.class);
 
         verify(walletRepository, never()).save(any());
@@ -59,7 +59,7 @@ class FreezeWalletCommandHandlerTest {
         Wallet wallet = Wallet.create(ownerId, Currency.getInstance("GBP"));
         when(walletRepository.findById(wallet.getId())).thenReturn(Optional.of(wallet));
 
-        assertThatThrownBy(() -> handler.handle(new FreezeWalletCommand(wallet.getId(), otherUserId)))
+        assertThatThrownBy(() -> handler.handle(new FreezeWalletCommandHandler.Command(wallet.getId(), otherUserId)))
                 .isInstanceOf(WalletAccessDeniedException.class);
 
         verify(walletRepository, never()).save(any());
@@ -72,7 +72,7 @@ class FreezeWalletCommandHandlerTest {
         wallet.freeze();
         when(walletRepository.findById(wallet.getId())).thenReturn(Optional.of(wallet));
 
-        assertThatThrownBy(() -> handler.handle(new FreezeWalletCommand(wallet.getId(), userId)))
+        assertThatThrownBy(() -> handler.handle(new FreezeWalletCommandHandler.Command(wallet.getId(), userId)))
                 .isInstanceOf(IllegalStateException.class);
     }
 }

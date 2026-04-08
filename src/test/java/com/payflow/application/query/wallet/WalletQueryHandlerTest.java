@@ -34,7 +34,7 @@ class WalletQueryHandlerTest {
 
         // When + Then
         assertThatThrownBy(() ->
-                walletQueryHandler.handle(new GetWalletByIdQuery(UUID.randomUUID(), UUID.randomUUID())))
+                walletQueryHandler.handle(new WalletQueryHandler.GetByIdQuery(UUID.randomUUID(), UUID.randomUUID())))
                 .isInstanceOf(WalletNotFoundException.class);
     }
 
@@ -46,7 +46,7 @@ class WalletQueryHandlerTest {
 
         // When + Then
         assertThatThrownBy(() ->
-                walletQueryHandler.handle(new GetWalletByIdQuery(wallet.getId(), UUID.randomUUID())))
+                walletQueryHandler.handle(new WalletQueryHandler.GetByIdQuery(wallet.getId(), UUID.randomUUID())))
                 .isInstanceOf(WalletAccessDeniedException.class);
     }
 }

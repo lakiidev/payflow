@@ -13,10 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class GetWalletBalanceQueryHandler {
 
+    public record Query(java.util.UUID walletId, java.util.UUID requestingUserId) {}
+
     private final WalletRepository walletRepository;
 
     @Transactional(readOnly = true)
-    public BalanceResponse handle(GetWalletBalanceQuery query) {
+    public BalanceResponse handle(Query query) {
         Wallet wallet = walletRepository.findById(query.walletId())
                 .orElseThrow(() -> new WalletNotFoundException(query.walletId()));
 

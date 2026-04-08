@@ -36,7 +36,7 @@ class GetWalletBalanceQueryHandlerTest {
         Wallet wallet = Wallet.create(userId, GBP);
         when(walletRepository.findById(wallet.getId())).thenReturn(Optional.of(wallet));
 
-        BalanceResponse response = handler.handle(new GetWalletBalanceQuery(wallet.getId(), userId));
+        BalanceResponse response = handler.handle(new GetWalletBalanceQueryHandler.Query(wallet.getId(), userId));
 
         assertThat(response.balanceCents()).isZero();
         assertThat(response.currency()).isEqualTo(GBP);
@@ -48,7 +48,7 @@ class GetWalletBalanceQueryHandlerTest {
         UUID walletId = UUID.randomUUID();
         when(walletRepository.findById(walletId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> handler.handle(new GetWalletBalanceQuery(walletId, UUID.randomUUID())))
+        assertThatThrownBy(() -> handler.handle(new GetWalletBalanceQueryHandler.Query(walletId, UUID.randomUUID())))
                 .isInstanceOf(WalletNotFoundException.class);
     }
 
@@ -59,7 +59,7 @@ class GetWalletBalanceQueryHandlerTest {
         Wallet wallet = Wallet.create(ownerId, GBP);
         when(walletRepository.findById(wallet.getId())).thenReturn(Optional.of(wallet));
 
-        assertThatThrownBy(() -> handler.handle(new GetWalletBalanceQuery(wallet.getId(), otherUserId)))
+        assertThatThrownBy(() -> handler.handle(new GetWalletBalanceQueryHandler.Query(wallet.getId(), otherUserId)))
                 .isInstanceOf(WalletAccessDeniedException.class);
     }
 }
