@@ -7,7 +7,7 @@ Accepted Week 1
 `UserDetails` object is required for Spring to perform
 Authentication. There are two standard approaches to
 provide that: have a domain `User` entity implement
-`USerDeatils` directly, or create a separate `UserDetailsImpl` wrapper
+`UserDetails` directly, or create a separate `UserDetailsImpl` wrapper
 class that adapts `User` to the `UserDetails` interface.
 
 ## Decision
