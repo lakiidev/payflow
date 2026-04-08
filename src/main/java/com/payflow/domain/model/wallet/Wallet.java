@@ -51,4 +51,11 @@ public class Wallet {
         wallet.status = WalletStatus.ACTIVE;
         return wallet;
     }
+
+    public void freeze() {
+        if (status != WalletStatus.ACTIVE) {
+            throw new IllegalStateException("Cannot freeze wallet with status: " + status);
+        }
+        this.status = WalletStatus.FROZEN;
+    }
 }

@@ -36,6 +36,7 @@ public class User implements UserDetails {
     @Column(nullable = false, name="password_hash")
     private String passwordHash;
 
+    @Getter
     @Column(nullable = false)
     private String fullName;
 

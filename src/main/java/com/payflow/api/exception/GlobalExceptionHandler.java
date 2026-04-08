@@ -3,6 +3,7 @@ package com.payflow.api.exception;
 import com.payflow.api.dto.response.ErrorResponse;
 import com.payflow.domain.model.user.EmailAlreadyRegisteredException;
 import com.payflow.domain.model.wallet.WalletAccessDeniedException;
+import com.payflow.domain.model.wallet.WalletAlreadyExistsException;
 import com.payflow.domain.model.wallet.WalletNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -41,5 +42,17 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handeDuplicateEmail(EmailAlreadyRegisteredException ex) {
         return new ErrorResponse("EMAIL_ALREADY_REGISTERED", ex.getMessage());
+    }
+
+    @ExceptionHandler(WalletAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleWalletAlreadyExists(WalletAlreadyExistsException ex) {
+        return new ErrorResponse("WALLET_ALREADY_EXISTS", ex.getMessage());
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleIllegalState(IllegalStateException ex) {
+        return new ErrorResponse("INVALID_WALLET_STATE", ex.getMessage());
     }
 }
