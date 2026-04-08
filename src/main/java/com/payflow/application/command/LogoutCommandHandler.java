@@ -5,11 +5,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class LogoutCommandHandler {
 
-    public record Command(java.util.UUID userId, String tokenJti) {}
+    public record Command(UUID userId, String tokenJti) {}
 
     // Week 1: no-op, client discards token
     // Week 3: redisTemplate.opsForValue().set("denylist:" + command.tokenJti(), ...)

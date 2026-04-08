@@ -1,32 +1,24 @@
 package com.payflow.application.command;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-@ExtendWith(MockitoExtension.class)
 class LogoutCommandHandlerTest {
 
-    @InjectMocks
-    private LogoutCommandHandler handler;
+    private final LogoutCommandHandler handler = new LogoutCommandHandler();
 
-    @Test
-    void shouldCompleteWithoutErrorForValidCommand() {
-        LogoutCommand command = new LogoutCommandHandler.Command(UUID.randomUUID(), "some.jwt.token");
-
-        assertThatCode(() -> handler.handle(command)).doesNotThrowAnyException();
-    }
-
-    @Test
-    void shouldCompleteWithoutErrorWhenTokenJtiIsNull() {
-        // Valid for Week 1 — jti is unused until Week 3 Redis denylist
-        LogoutCommand command = new LogoutCommandHandler.Command(UUID.randomUUID(), null);
-
-        assertThatCode(() -> handler.handle(command)).doesNotThrowAnyException();
+    @ParameterizedTest(name = "token={0}")
+    @NullSource
+    @ValueSource(strings = {"some.jwt.token"})
+    void handleCompletesForAnyToken(String token) {
+        // Week 1: no-op — jti unused until Week 3 Redis denylist
+        assertThatCode(() -> handler.handle(
+                new LogoutCommandHandler.Command(UUID.randomUUID(), token)))
+                .doesNotThrowAnyException();
     }
 }
