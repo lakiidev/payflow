@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +23,7 @@ public class AuthQueryHandler {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
+    @Transactional(readOnly = true)
     public AuthenticationResponse handle(AuthQuery query)
     {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(

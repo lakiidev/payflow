@@ -6,7 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.math.BigDecimal;
+
 import java.time.Instant;
 import java.util.Currency;
 import java.util.UUID;
@@ -27,7 +27,7 @@ public class Wallet {
     private Currency currency;
 
     @Column(nullable = false, precision = 19, scale = 4)
-    private BigDecimal currentBalance;
+    private Long currentBalance;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
@@ -47,7 +47,7 @@ public class Wallet {
         Wallet wallet = new Wallet();
         wallet.userId = userId;
         wallet.currency = currency;
-        wallet.currentBalance = BigDecimal.ZERO;
+        wallet.currentBalance = 0L;
         wallet.status = WalletStatus.ACTIVE;
         return wallet;
     }

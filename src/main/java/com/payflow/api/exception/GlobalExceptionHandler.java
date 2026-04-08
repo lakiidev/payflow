@@ -1,6 +1,7 @@
 package com.payflow.api.exception;
 
 import com.payflow.api.dto.response.ErrorResponse;
+import com.payflow.domain.model.user.EmailAlreadyRegisteredException;
 import com.payflow.domain.model.wallet.WalletAccessDeniedException;
 import com.payflow.domain.model.wallet.WalletNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -34,5 +35,11 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleWalletAccessDenied(WalletAccessDeniedException ex) {
         return new ErrorResponse("ACCESS_DENIED", ex.getMessage());
+    }
+
+    @ExceptionHandler(EmailAlreadyRegisteredException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handeDuplicateEmail(EmailAlreadyRegisteredException ex) {
+        return new ErrorResponse("EMAIL_ALREADY_REGISTERED", ex.getMessage());
     }
 }

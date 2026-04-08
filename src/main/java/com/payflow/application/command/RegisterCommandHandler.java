@@ -1,17 +1,21 @@
+// TODO(Week 3): Move to LoginCommandHandler when stateful refresh tokens
+// introduce real DB writes — currently stateless so side effects are minimal.
+
 package com.payflow.application.command;
 
 import com.payflow.api.dto.response.AuthenticationResponse;
+import com.payflow.domain.model.user.EmailAlreadyRegisteredException;
 import com.payflow.domain.model.user.User;
 import com.payflow.domain.model.user.UserStatus;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.infrastructure.persistence.jpa.UserRepository;
 import com.payflow.infrastructure.persistence.jpa.WalletRepository;
 import com.payflow.infrastructure.security.JwtService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Currency;
 
@@ -27,7 +31,7 @@ public class RegisterCommandHandler {
     @Transactional // For future use, convention wise atm
     public AuthenticationResponse handle(RegisterCommand command) {
         if (userRepository.existsByEmail(command.email())) {
-            throw new BadCredentialsException(command.email());
+            throw new EmailAlreadyRegisteredException(command.email());
         }
         User user = User.builder()
                 .fullName(command.fullName())
