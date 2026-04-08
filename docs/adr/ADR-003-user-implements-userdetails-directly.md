@@ -4,7 +4,7 @@
 Accepted Week 1
 
 ## Context
-`UserDetails` object is required for Sping to perform
+`UserDetails` object is required for Spring to perform
 Authentication. There are two standard approaches to
 provide that: have a domain `User` entity implement
 `USerDeatils` directly, or create a separate `UserDetailsImpl` wrapper
