@@ -14,7 +14,7 @@ business intelligence (transaction volume, user count) and are trivially
 enumerable by an attacker.
 
 ## Decision
-Use UUID v4 for all primary keys, generated at object construction time in Java via Hibernate's @UuidGenerator . Mapped as `UUID` in Java, stored as native `uuid` type
+Use UUID v4 for all primary keys, generated at object construction time in Java via Hibernate's `@UuidGenerator`. Mapped as `UUID` in Java, stored as native `uuid` type
 in PostgreSQL.
 
 ## Alternatives Considered
