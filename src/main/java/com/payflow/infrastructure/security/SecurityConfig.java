@@ -31,15 +31,14 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authenticationProvider) {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(reqeust ->
-                        reqeust.requestMatchers("/api/auth/**")
+                .authorizeHttpRequests(auth ->
+                        auth.requestMatchers("/api/auth/**")
                                 .permitAll()
                                 .requestMatchers(
                                         "/swagger-ui/**",
                                         "/swagger-ui.html",
                                         "/v3/api-docs/**"
-                                ).permitAll().anyRequest()
-                                .authenticated()
+                                ).permitAll().anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
