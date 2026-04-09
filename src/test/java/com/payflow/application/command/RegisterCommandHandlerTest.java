@@ -44,7 +44,7 @@ class RegisterCommandHandlerTest {
     @Test
     void shouldRegisterUserAndReturnTokens() {
         // Given
-        RegisterCommand command = new RegisterCommand(
+        RegisterCommandHandler.Command command = new RegisterCommandHandler.Command(
                 "test@payflow.com",
                 "password123",
                 "Test User"
@@ -70,7 +70,7 @@ class RegisterCommandHandlerTest {
     void shouldThrowWhenEmailAlreadyRegistered() {
         // Given
 
-        RegisterCommand command = new RegisterCommand(
+        RegisterCommandHandler.Command command = new RegisterCommandHandler.Command(
                     "existing@payflow.com",
                 "password123",
                 "Existing User"

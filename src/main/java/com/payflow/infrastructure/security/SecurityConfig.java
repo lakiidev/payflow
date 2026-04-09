@@ -3,7 +3,7 @@ package com.payflow.infrastructure.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import com.payflow.infrastructure.persistence.jpa.UserRepository;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -31,7 +31,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/api/auth/**")
+                        auth.requestMatchers("/api/v1/auth/**")
                                 .permitAll()
                                 .requestMatchers(
                                         "/swagger-ui/**",

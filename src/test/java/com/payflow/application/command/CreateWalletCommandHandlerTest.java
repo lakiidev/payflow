@@ -1,0 +1,56 @@
+package com.payflow.application.command;
+
+import com.payflow.api.dto.response.WalletResponse;
+import com.payflow.domain.model.wallet.Wallet;
+import com.payflow.domain.model.wallet.WalletAlreadyExistsException;
+import com.payflow.infrastructure.persistence.jpa.WalletRepository;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Currency;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class CreateWalletCommandHandlerTest {
+
+    @Mock
+    private WalletRepository walletRepository;
+
+    @InjectMocks
+    private CreateWalletCommandHandler handler;
+
+    private static final Currency EUR = Currency.getInstance("EUR");
+
+    @Test
+    void shouldCreateWalletForNewCurrency() {
+        UUID userId = UUID.randomUUID();
+        when(walletRepository.findByUserIdAndCurrency(userId, EUR)).thenReturn(Optional.empty());
+
+        WalletResponse response = handler.handle(new CreateWalletCommandHandler.Command(userId, EUR));
+
+        assertThat(response.currency()).isEqualTo(EUR);
+        assertThat(response.balance()).isZero();
+        verify(walletRepository).save(any(Wallet.class));
+    }
+
+    @Test
+    void shouldThrowWhenWalletForCurrencyAlreadyExists() {
+        UUID userId = UUID.randomUUID();
+        Wallet existing = Wallet.create(userId, EUR);
+        when(walletRepository.findByUserIdAndCurrency(userId, EUR)).thenReturn(Optional.of(existing));
+
+        assertThatThrownBy(() -> handler.handle(new CreateWalletCommandHandler.Command(userId, EUR)))
+                .isInstanceOf(WalletAlreadyExistsException.class);
+
+        verify(walletRepository, never()).save(any());
+    }
+}

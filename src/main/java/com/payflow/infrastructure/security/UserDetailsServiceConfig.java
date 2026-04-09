@@ -9,7 +9,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @Configuration
 @RequiredArgsConstructor
-public class UserDetailsServiceConfig {
+public class
+UserDetailsServiceConfig {
 
     private final UserRepository userRepository;
 

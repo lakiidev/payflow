@@ -1,0 +1,77 @@
+package com.payflow.application.command;
+
+import com.payflow.domain.model.wallet.Wallet;
+import com.payflow.domain.model.wallet.WalletNotFoundException;
+import com.payflow.domain.model.wallet.WalletStatus;
+import com.payflow.infrastructure.persistence.jpa.WalletRepository;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Currency;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class FreezeWalletCommandHandlerTest {
+
+    @Mock
+    private WalletRepository walletRepository;
+
+    @InjectMocks
+    private FreezeWalletCommandHandler handler;
+
+    @Test
+    void shouldFreezeActiveWallet() {
+        UUID userId = UUID.randomUUID();
+        Wallet wallet = Wallet.create(userId, Currency.getInstance("GBP"));
+        when(walletRepository.findByIdAndUserId(wallet.getId(), userId)).thenReturn(Optional.of(wallet));
+
+        handler.handle(new FreezeWalletCommandHandler.Command(wallet.getId(), userId));
+
+        assertThat(wallet.getStatus()).isEqualTo(WalletStatus.FROZEN);
+        verify(walletRepository).save(wallet);
+    }
+
+    @Test
+    void shouldThrowWhenWalletNotFound() {
+        UUID walletId = UUID.randomUUID();
+        when(walletRepository.findByIdAndUserId(any(), any())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> handler.handle(new FreezeWalletCommandHandler.Command(walletId, UUID.randomUUID())))
+                .isInstanceOf(WalletNotFoundException.class);
+
+        verify(walletRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldThrowWhenUserDoesNotOwnWallet() {
+        UUID ownerId = UUID.randomUUID();
+        UUID otherUserId = UUID.randomUUID();
+        Wallet wallet = Wallet.create(ownerId, Currency.getInstance("GBP"));
+        when(walletRepository.findByIdAndUserId(wallet.getId(), otherUserId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> handler.handle(new FreezeWalletCommandHandler.Command(wallet.getId(), otherUserId)))
+                .isInstanceOf(WalletNotFoundException.class);
+
+        verify(walletRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldThrowWhenWalletIsAlreadyFrozen() {
+        UUID userId = UUID.randomUUID();
+        Wallet wallet = Wallet.create(userId, Currency.getInstance("GBP"));
+        wallet.freeze();
+        when(walletRepository.findByIdAndUserId(wallet.getId(), userId)).thenReturn(Optional.of(wallet));
+
+        assertThatThrownBy(() -> handler.handle(new FreezeWalletCommandHandler.Command(wallet.getId(), userId)))
+                .isInstanceOf(IllegalStateException.class);
+    }
+}

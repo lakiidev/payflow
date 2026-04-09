@@ -12,7 +12,6 @@ import com.payflow.infrastructure.persistence.jpa.UserRepository;
 import com.payflow.infrastructure.persistence.jpa.WalletRepository;
 import com.payflow.infrastructure.security.JwtService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,13 +22,15 @@ import java.util.Currency;
 @RequiredArgsConstructor
 public class RegisterCommandHandler {
 
+    public record Command(String email, String password, String fullName) {}
+
     private final UserRepository userRepository;
     private final WalletRepository walletRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
     @Transactional // For future use, convention wise atm
-    public AuthenticationResponse handle(RegisterCommand command) {
+    public AuthenticationResponse handle(Command command) {
         if (userRepository.existsByEmail(command.email())) {
             throw new EmailAlreadyRegisteredException(command.email());
         }

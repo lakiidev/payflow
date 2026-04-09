@@ -18,13 +18,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class AuthQueryHandler {
+
+    public record Query(String email, String password) {}
+
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
     @Transactional(readOnly = true)
-    public AuthenticationResponse handle(AuthQuery query)
+    public AuthenticationResponse handle(Query query)
     {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 query.email(),
