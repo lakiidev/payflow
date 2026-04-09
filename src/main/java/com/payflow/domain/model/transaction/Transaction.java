@@ -44,7 +44,4 @@ public class Transaction {
     @CreationTimestamp
     private Instant createdAt;
 
-    @UpdateTimestamp
-    private Instant  updatedAt;
-
 }
