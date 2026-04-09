@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Table(name = "ledger_entries")
@@ -33,5 +34,5 @@ public class LedgerEntry {
     private Long balanceAfter;
 
     @CreationTimestamp
-    private Long createdAt;
+    private Instant createdAt;
 }
