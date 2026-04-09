@@ -2,7 +2,6 @@ package com.payflow.application.query.wallet;
 
 import com.payflow.api.dto.response.WalletResponse;
 import com.payflow.domain.model.wallet.Wallet;
-import com.payflow.domain.model.wallet.WalletAccessDeniedException;
 import com.payflow.domain.model.wallet.WalletNotFoundException;
 import com.payflow.infrastructure.persistence.jpa.WalletRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,12 +30,8 @@ public class WalletQueryHandler {
 
     @Transactional(readOnly = true)
     public WalletResponse handle(GetByIdQuery query) {
-        Wallet wallet = walletRepository.findById(query.walletId()).orElseThrow(
-                () -> new WalletNotFoundException(query.walletId())
-        );
-        if (!wallet.getUserId().equals(query.requestingUserId())) {
-            throw new WalletAccessDeniedException(query.requestingUserId());
-        }
+        Wallet wallet = walletRepository.findByIdAndUserId(query.walletId(), query.requestingUserId())
+                .orElseThrow(() -> new WalletNotFoundException(query.walletId()));
         return WalletResponse.from(wallet);
     }
 }

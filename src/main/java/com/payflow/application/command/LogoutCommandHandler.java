@@ -11,7 +11,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class LogoutCommandHandler {
 
-    public record Command(UUID userId, String tokenJti) {}
+    // Week 1: token string
+    // Week 3: tokenJti
+    public record Command(UUID userId, String token) {}
 
     // Week 1: no-op, client discards token
     // Week 3: redisTemplate.opsForValue().set("denylist:" + command.tokenJti(), ...)

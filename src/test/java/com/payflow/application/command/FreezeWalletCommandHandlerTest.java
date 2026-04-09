@@ -1,7 +1,6 @@
 package com.payflow.application.command;
 
 import com.payflow.domain.model.wallet.Wallet;
-import com.payflow.domain.model.wallet.WalletAccessDeniedException;
 import com.payflow.domain.model.wallet.WalletNotFoundException;
 import com.payflow.domain.model.wallet.WalletStatus;
 import com.payflow.infrastructure.persistence.jpa.WalletRepository;
@@ -33,7 +32,7 @@ class FreezeWalletCommandHandlerTest {
     void shouldFreezeActiveWallet() {
         UUID userId = UUID.randomUUID();
         Wallet wallet = Wallet.create(userId, Currency.getInstance("GBP"));
-        when(walletRepository.findById(wallet.getId())).thenReturn(Optional.of(wallet));
+        when(walletRepository.findByIdAndUserId(wallet.getId(), userId)).thenReturn(Optional.of(wallet));
 
         handler.handle(new FreezeWalletCommandHandler.Command(wallet.getId(), userId));
 
@@ -44,7 +43,7 @@ class FreezeWalletCommandHandlerTest {
     @Test
     void shouldThrowWhenWalletNotFound() {
         UUID walletId = UUID.randomUUID();
-        when(walletRepository.findById(walletId)).thenReturn(Optional.empty());
+        when(walletRepository.findByIdAndUserId(any(), any())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> handler.handle(new FreezeWalletCommandHandler.Command(walletId, UUID.randomUUID())))
                 .isInstanceOf(WalletNotFoundException.class);
@@ -57,10 +56,10 @@ class FreezeWalletCommandHandlerTest {
         UUID ownerId = UUID.randomUUID();
         UUID otherUserId = UUID.randomUUID();
         Wallet wallet = Wallet.create(ownerId, Currency.getInstance("GBP"));
-        when(walletRepository.findById(wallet.getId())).thenReturn(Optional.of(wallet));
+        when(walletRepository.findByIdAndUserId(wallet.getId(), otherUserId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> handler.handle(new FreezeWalletCommandHandler.Command(wallet.getId(), otherUserId)))
-                .isInstanceOf(WalletAccessDeniedException.class);
+                .isInstanceOf(WalletNotFoundException.class);
 
         verify(walletRepository, never()).save(any());
     }
@@ -70,7 +69,7 @@ class FreezeWalletCommandHandlerTest {
         UUID userId = UUID.randomUUID();
         Wallet wallet = Wallet.create(userId, Currency.getInstance("GBP"));
         wallet.freeze();
-        when(walletRepository.findById(wallet.getId())).thenReturn(Optional.of(wallet));
+        when(walletRepository.findByIdAndUserId(wallet.getId(), userId)).thenReturn(Optional.of(wallet));
 
         assertThatThrownBy(() -> handler.handle(new FreezeWalletCommandHandler.Command(wallet.getId(), userId)))
                 .isInstanceOf(IllegalStateException.class);

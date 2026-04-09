@@ -2,7 +2,6 @@ package com.payflow.application.query.wallet;
 
 import com.payflow.api.dto.response.BalanceResponse;
 import com.payflow.domain.model.wallet.Wallet;
-import com.payflow.domain.model.wallet.WalletAccessDeniedException;
 import com.payflow.domain.model.wallet.WalletNotFoundException;
 import com.payflow.infrastructure.persistence.jpa.WalletRepository;
 import org.junit.jupiter.api.Test;
@@ -17,6 +16,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,7 +34,7 @@ class GetWalletBalanceQueryHandlerTest {
     void shouldReturnBalanceForWalletOwner() {
         UUID userId = UUID.randomUUID();
         Wallet wallet = Wallet.create(userId, GBP);
-        when(walletRepository.findById(wallet.getId())).thenReturn(Optional.of(wallet));
+        when(walletRepository.findByIdAndUserId(wallet.getId(), userId)).thenReturn(Optional.of(wallet));
 
         BalanceResponse response = handler.handle(new GetWalletBalanceQueryHandler.Query(wallet.getId(), userId));
 
@@ -46,7 +46,7 @@ class GetWalletBalanceQueryHandlerTest {
     @Test
     void shouldThrowWhenWalletNotFound() {
         UUID walletId = UUID.randomUUID();
-        when(walletRepository.findById(walletId)).thenReturn(Optional.empty());
+        when(walletRepository.findByIdAndUserId(any(), any())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> handler.handle(new GetWalletBalanceQueryHandler.Query(walletId, UUID.randomUUID())))
                 .isInstanceOf(WalletNotFoundException.class);
@@ -57,9 +57,9 @@ class GetWalletBalanceQueryHandlerTest {
         UUID ownerId = UUID.randomUUID();
         UUID otherUserId = UUID.randomUUID();
         Wallet wallet = Wallet.create(ownerId, GBP);
-        when(walletRepository.findById(wallet.getId())).thenReturn(Optional.of(wallet));
+        when(walletRepository.findByIdAndUserId(wallet.getId(), otherUserId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> handler.handle(new GetWalletBalanceQueryHandler.Query(wallet.getId(), otherUserId)))
-                .isInstanceOf(WalletAccessDeniedException.class);
+                .isInstanceOf(WalletNotFoundException.class);
     }
 }
