@@ -2,6 +2,7 @@ package com.payflow.domain.model.transaction;
 
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -14,6 +15,7 @@ import java.util.UUID;
 @Table(name = "transactions")
 @Entity
 @NoArgsConstructor
+@Getter
 
 public class Transaction {
     @Id
