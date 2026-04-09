@@ -3,6 +3,8 @@
 Accepted — Week 1
 To be refactored in Week 3 — WalletQueryHandlerTest already mocks
 WalletRepository directly, confirming the domain interface is now justified.
+Applies to all aggregate repositories: WalletRepository, TransactionRepository,
+and LedgerEntryRepository — all three to be refactored together in Week 3.
 
 ## Context
 DDD prescribes that aggregates are accessed through domain repository interfaces
@@ -39,7 +41,7 @@ The repository is injected and used directly in command and query handlers.
 - Refactoring to a domain interface is mechanical when the time comes
 
 ## Rationale
-Abstraction without a current use case is speculative complexity. The domain
+Abstraction without a current use case is a speculative complexity. The domain
 repository interface earns its existence when a unit test needs to mock it.
 Until that test exists, the interface is indirection for its own sake.
 

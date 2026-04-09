@@ -6,6 +6,7 @@ import java.util.Currency;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 
 class WalletTest {
@@ -19,5 +20,41 @@ class WalletTest {
         assertThat(wallet.getCurrentBalance()).isZero();
         assertThat(wallet.getStatus()).isEqualTo(WalletStatus.ACTIVE);
         assertThat(wallet.getCurrency()).isEqualTo(Currency.getInstance("GBP"));
+    }
+
+    @Test
+    void shouldReduceBalanceOnDebit() {
+        // Given
+        Wallet wallet = Wallet.create(UUID.randomUUID(), Currency.getInstance("GBP"));
+        wallet.credit(1000L);
+
+        // When
+        wallet.debit(400L);
+
+        // Then
+        assertThat(wallet.getCurrentBalance()).isEqualTo(600L);
+    }
+
+    @Test
+    void shouldThrowWhenDebitExceedsBalance() {
+        // Given
+        Wallet wallet = Wallet.create(UUID.randomUUID(), Currency.getInstance("GBP"));
+        wallet.credit(100L);
+
+        // When + Then
+        assertThatThrownBy(() -> wallet.debit(200L))
+                .isInstanceOf(InsufficientBalanceException.class);
+    }
+
+    @Test
+    void shouldIncreaseBalanceOnCredit() {
+        // Given
+        Wallet wallet = Wallet.create(UUID.randomUUID(), Currency.getInstance("GBP"));
+
+        // When
+        wallet.credit(500L);
+
+        // Then
+        assertThat(wallet.getCurrentBalance()).isEqualTo(500L);
     }
 }

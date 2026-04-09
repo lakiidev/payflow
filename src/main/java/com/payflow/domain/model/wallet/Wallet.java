@@ -58,4 +58,16 @@ public class Wallet {
         }
         this.status = WalletStatus.FROZEN;
     }
+
+    public void debit(Long amountCents){
+        if(amountCents > this.currentBalance){
+            throw new InsufficientBalanceException(this.id, amountCents);
+        }
+
+        this.currentBalance -= amountCents;
+    }
+
+    public void credit(long amountCents) {
+        this.currentBalance += amountCents;
+    }
 }
