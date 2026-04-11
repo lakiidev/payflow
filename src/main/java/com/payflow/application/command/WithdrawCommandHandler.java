@@ -22,6 +22,7 @@ import java.util.UUID;
 public class WithdrawCommandHandler {
 
     private final WalletService walletService;
+    private final WalletRepository walletRepository;
 
     public record Command(
             String idempotencyKey,
@@ -31,7 +32,6 @@ public class WithdrawCommandHandler {
     ) {}
 
     private final IdempotencyService idempotencyService;
-    private final WalletRepository walletRepository;
     private final TransactionRepository transactionRepository;
     private final LedgerService ledgerService;
     private final TransactionEventPublisher eventPublisher;
@@ -57,10 +57,11 @@ public class WithdrawCommandHandler {
                 command.amountCents(),
                 wallet.getCurrency()
         );
-        transactionRepository.save(tx);
+        tx = idempotencyService.deduplicateOrSave(tx);
 
         // STEP 5: debit first - checks balance AND updates currentBalance
         wallet.debit(command.amountCents());
+        walletRepository.save(wallet);
 
         // STEP 4: Ledger entry after = balanceAfter is now correct
         ledgerService.createDebitEntry(tx, wallet, command.amountCents());

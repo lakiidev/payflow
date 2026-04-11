@@ -57,7 +57,7 @@ public class DepositCommandHandler {
                 command.amountCents(),
                 wallet.getCurrency()
         );
-        transactionRepository.save(tx);
+        tx = idempotencyService.deduplicateOrSave(tx);
 
         // STEP 5: Ledger entry first (source of truth)
         ledgerService.createCreditEntry(tx, wallet, command.amountCents());

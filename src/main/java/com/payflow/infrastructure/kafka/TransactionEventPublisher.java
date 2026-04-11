@@ -1,5 +1,7 @@
 package com.payflow.infrastructure.kafka;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.payflow.domain.model.outbox.OutboxEvent;
 import com.payflow.domain.model.outbox.OutboxEventStatus;
 import com.payflow.domain.model.transaction.Transaction;
@@ -7,8 +9,6 @@ import com.payflow.domain.model.transaction.TransactionType;
 import com.payflow.infrastructure.persistence.jpa.OutboxRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
 import java.util.Currency;
@@ -50,7 +50,7 @@ public class TransactionEventPublisher {
         try {
             return objectMapper.writeValueAsString(payload);
         }
-        catch (JacksonException e)
+        catch (JsonProcessingException e)
         {
             throw new IllegalStateException("Failed to serialize outbox payload: " + payload.getClass().getSimpleName(), e);
         }

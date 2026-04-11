@@ -3,6 +3,7 @@ package com.payflow.application.command;
 import com.payflow.application.service.IdempotencyService;
 import com.payflow.application.service.LedgerService;
 import com.payflow.application.service.WalletService;
+import com.payflow.domain.model.transaction.CurrencyMismatchException;
 import com.payflow.domain.model.transaction.Transaction;
 import com.payflow.domain.model.transaction.TransactionType;
 import com.payflow.domain.model.wallet.Wallet;
@@ -48,12 +49,15 @@ public class TransferCommandHandler {
             throw new IllegalArgumentException("Cannot transfer to the same wallet");
         }
 
-        // STEP 3: Load both wallets — only source needs ownership check
+        // STEP 3: Load both wallets — only a source needs ownership check
         Wallet sourceWallet = walletService.getActiveById(command.sourceWalletId(), command.requestingUserId());
-        Wallet destionationWallet = walletService.getActiveById(command.sourceWalletId(), command.requestingUserId());
+        Wallet destionationWallet = walletService.getActiveById(command.destinationWalletId(), command.requestingUserId());
+        if (!sourceWallet.getCurrency().equals(destionationWallet.getCurrency())) {
+            throw new CurrencyMismatchException(sourceWallet.getCurrency(), destionationWallet.getCurrency());
+        }
 
 
-        // STEP 4: Create PENDING transaction record
+        // STEP 4: Create a PENDING transaction record
         Transaction tx = Transaction.create(
                 command.idempotencyKey(),
                 TransactionType.TRANSFER,
@@ -62,15 +66,17 @@ public class TransferCommandHandler {
                 command.amountCents(),
                 sourceWallet.getCurrency()
         );
-        transactionRepository.save(tx);
+        tx = idempotencyService.deduplicateOrSave(tx);
 
         // STEP 5: Debit source first — throws InsufficientBalanceException if needed
         sourceWallet.debit(command.amountCents());
+        walletRepository.save(sourceWallet);
         ledgerService.createDebitEntry(tx, sourceWallet, command.amountCents());
 
         // STEP 6: Credit destination
         ledgerService.createCreditEntry(tx, destionationWallet, command.amountCents());
         destionationWallet.credit(command.amountCents());
+        walletRepository.save(destionationWallet);
 
         // STEP 7: Mark complete and persist
         tx.complete();
