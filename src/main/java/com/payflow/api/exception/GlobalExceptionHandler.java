@@ -60,14 +60,11 @@ public class GlobalExceptionHandler {
         return new ErrorResponse("INSUFFICIENT_BALANCE", ex.getMessage());
     }
 
-
     @ExceptionHandler(CurrencyMismatchException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
     public ErrorResponse handleCurrencyMismatch(CurrencyMismatchException ex) {
         return new ErrorResponse("CURRENCY_MISMATCH", ex.getMessage());
     }
-
-
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleDataIntegrity(DataIntegrityViolationException ex) {
