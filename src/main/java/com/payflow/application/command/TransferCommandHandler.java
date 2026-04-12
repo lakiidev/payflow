@@ -7,7 +7,7 @@ import com.payflow.domain.model.transaction.CurrencyMismatchException;
 import com.payflow.domain.model.transaction.Transaction;
 import com.payflow.domain.model.transaction.TransactionType;
 import com.payflow.domain.model.wallet.Wallet;
-import com.payflow.infrastructure.kafka.TransactionEventPublisher;
+import com.payflow.infrastructure.kafka.TransactionOutboxWriter;
 import com.payflow.infrastructure.persistence.jpa.TransactionRepository;
 import com.payflow.infrastructure.persistence.jpa.WalletRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class TransferCommandHandler {
     private final WalletRepository walletRepository;
     private final TransactionRepository transactionRepository;
     private final LedgerService ledgerService;
-    private final TransactionEventPublisher eventPublisher;
+    private final TransactionOutboxWriter eventPublisher;
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public Transaction handle(Command command) {

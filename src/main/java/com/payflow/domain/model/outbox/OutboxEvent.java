@@ -3,6 +3,7 @@ package com.payflow.domain.model.outbox;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -17,6 +18,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
 
 public class OutboxEvent {
     @Id
@@ -49,4 +51,7 @@ public class OutboxEvent {
         this.status = OutboxEventStatus.PROCESSED;
         this.processedAt = Instant.now();
     }
+
+
+
 }
