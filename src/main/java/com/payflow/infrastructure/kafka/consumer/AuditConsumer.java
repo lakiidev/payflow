@@ -50,7 +50,7 @@ public class AuditConsumer {
                         // Ack
                         processedEventRepository.save(
                                 ProcessedEvent.builder()
-                                        .uuid(event.transactionId())
+                                        .eventId(event.transactionId())
                                         .processedAt(Instant.now())
                                         .build()
                         );

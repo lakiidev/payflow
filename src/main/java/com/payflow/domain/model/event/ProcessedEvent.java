@@ -7,7 +7,6 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.UuidGenerator;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -18,10 +17,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProcessedEvent {
-    @UuidGenerator
     @Id
-    private UUID uuid;
+    @Column(name = "event_id", updatable = false)
+    private UUID eventId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private Instant processedAt;
 }
