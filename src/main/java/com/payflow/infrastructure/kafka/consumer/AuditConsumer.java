@@ -24,7 +24,7 @@ public class AuditConsumer {
     private final ObjectMapper objectMapper;
 
     @KafkaListener(
-            topics = "transactions",
+            topics = "${payflow.kafka.topics.transactions}",
             groupId = "${payflow.kafka.consumer.audit-group}"
     )
     public void handle(String payload) {

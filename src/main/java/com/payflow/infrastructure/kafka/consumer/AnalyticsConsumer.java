@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class AnalyticsConsumer {
 
     @KafkaListener(
-            topics = "transactions",
+            topics = "${payflow.kafka.topics.transactions}",
             groupId = "${payflow.kafka.consumer.analytics-group}"
     )
     public void handle(String payload) {
