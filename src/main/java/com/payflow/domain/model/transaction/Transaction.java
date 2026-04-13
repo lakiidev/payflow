@@ -46,8 +46,11 @@ public class Transaction {
     @CreationTimestamp
     private Instant createdAt;
 
-    @Column(nullable = true)
+    @Column
     private Instant completedAt;
+
+    @Column
+    private UUID userId;
 
     public void complete() {
         this.status = TransactionStatus.SUCCESS;
