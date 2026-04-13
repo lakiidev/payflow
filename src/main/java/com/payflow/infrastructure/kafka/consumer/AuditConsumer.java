@@ -1,0 +1,64 @@
+package com.payflow.infrastructure.kafka.consumer;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.payflow.domain.model.audit.AuditLog;
+import com.payflow.domain.model.event.ProcessedEvent;
+import com.payflow.infrastructure.persistence.jpa.AuditLogRepository;
+import com.payflow.infrastructure.persistence.jpa.ProcessedEventRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import java.time.Instant;
+
+import static com.payflow.infrastructure.kafka.TransactionOutboxWriter.*;
+
+@Component
+@RequiredArgsConstructor
+public class AuditConsumer {
+    private final TransactionTemplate transactionTemplate;
+    private final ProcessedEventRepository processedEventRepository;
+    private final AuditLogRepository auditLogRepository;
+    private final ObjectMapper objectMapper;
+
+    @KafkaListener(
+            topics = "${payflow.kafka.topics.transactions}",
+            groupId = "${payflow.kafka.consumer.audit-group}"
+    )
+    public void handle(String payload) {
+        // insert into audit_logs table
+        transactionTemplate.execute(
+                status -> {
+                    try {
+                        TransactionCreatedPayload event = objectMapper
+                                .readValue(payload,
+                                        TransactionCreatedPayload.class);
+// Check
+                        if (processedEventRepository.existsById(event.transactionId())) {
+                            return null;
+                        }
+
+                        // Process
+                        auditLogRepository.save(AuditLog.builder()
+                                .action(event.type().name())
+                                .entityType("Transaction")
+                                .entityId(event.transactionId())
+                                .build());
+
+                        // Ack
+                        processedEventRepository.save(
+                                ProcessedEvent.builder()
+                                        .eventId(event.transactionId())
+                                        .processedAt(Instant.now())
+                                        .build()
+                        );
+                        return null;
+                    } catch (JsonProcessingException e) {
+                        throw new IllegalStateException("Failed to deserialize payload", e);
+                    }
+                }
+        );
+    }
+}

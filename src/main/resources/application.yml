@@ -17,10 +17,12 @@ spring:
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
-      acks: all
-      enable-idempotence: true
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3
+      properties:
+        enable.idempotence: true
+        acks: all
     consumer:
       group-id: payflow-${spring.profiles.active}
       enable-auto-commit: false
@@ -28,6 +30,12 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
 payflow:
+  kafka:
+    topics:
+      transactions: transactions
+    consumer:
+      analytics-group: analytics-${spring.profiles.active}
+      audit-group: audit-${spring.profiles.active}
   outbox:
     poll-interval-ms: 500
     batch-size: 100
