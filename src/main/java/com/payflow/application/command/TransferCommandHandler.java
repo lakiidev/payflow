@@ -8,6 +8,8 @@ import com.payflow.domain.model.transaction.InvalidWalletOperationException;
 import com.payflow.domain.model.transaction.Transaction;
 import com.payflow.domain.model.transaction.TransactionType;
 import com.payflow.domain.model.wallet.Wallet;
+import com.payflow.domain.model.wallet.WalletNotFoundException;
+import com.payflow.domain.model.wallet.WalletStatus;
 import com.payflow.infrastructure.kafka.TransactionOutboxWriter;
 import com.payflow.infrastructure.persistence.jpa.TransactionRepository;
 import com.payflow.infrastructure.persistence.jpa.WalletRepository;
@@ -50,11 +52,12 @@ public class TransferCommandHandler {
             throw new InvalidWalletOperationException(command.sourceWalletId());
         }
 
-        // STEP 3: Load both wallets — only a source needs ownership check
+        // STEP 3: Load both wallets — only source needs ownership check
         Wallet sourceWallet = walletService.getActiveById(command.sourceWalletId(), command.requestingUserId());
-        Wallet destionationWallet = walletService.getActiveById(command.destinationWalletId(), command.requestingUserId());
-        if (!sourceWallet.getCurrency().equals(destionationWallet.getCurrency())) {
-            throw new CurrencyMismatchException(sourceWallet.getCurrency(), destionationWallet.getCurrency());
+        Wallet destinationWallet = walletRepository.findByIdAndStatus(command.destinationWalletId(), WalletStatus.ACTIVE)
+                .orElseThrow(() -> new WalletNotFoundException(command.destinationWalletId()));
+        if (!sourceWallet.getCurrency().equals(destinationWallet.getCurrency())) {
+            throw new CurrencyMismatchException(sourceWallet.getCurrency(), destinationWallet.getCurrency());
         }
 
 
@@ -70,15 +73,15 @@ public class TransferCommandHandler {
         );
         tx = idempotencyService.deduplicateOrSave(tx);
 
-        // STEP 5: Debit source first — throws InsufficientBalanceException if needed
+        // STEP 5: Debit source — ledger first, then mutate cached balance
+        ledgerService.createDebitEntry(tx, sourceWallet, command.amountCents());
         sourceWallet.debit(command.amountCents());
         walletRepository.save(sourceWallet);
-        ledgerService.createDebitEntry(tx, sourceWallet, command.amountCents());
 
         // STEP 6: Credit destination
-        ledgerService.createCreditEntry(tx, destionationWallet, command.amountCents());
-        destionationWallet.credit(command.amountCents());
-        walletRepository.save(destionationWallet);
+        ledgerService.createCreditEntry(tx, destinationWallet, command.amountCents());
+        destinationWallet.credit(command.amountCents());
+        walletRepository.save(destinationWallet);
 
         // STEP 7: Mark complete and persist
         tx.complete();

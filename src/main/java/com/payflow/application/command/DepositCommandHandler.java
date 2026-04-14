@@ -26,7 +26,13 @@ public class DepositCommandHandler {
             UUID walletId,
             UUID requestingUserId,
             long amountCents
-    ) {}
+    ) {
+        public Command {
+            if (amountCents <= 0) {
+                throw new IllegalArgumentException("Deposit amount must be positive, got: " + amountCents);
+            }
+        }
+    }
 
     private final IdempotencyService idempotencyService;
     private final TransactionRepository transactionRepository;

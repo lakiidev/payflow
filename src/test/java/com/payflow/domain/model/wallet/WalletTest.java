@@ -57,4 +57,27 @@ class WalletTest {
         // Then
         assertThat(wallet.getCurrentBalance()).isEqualTo(500L);
     }
+
+    @Test
+    void shouldFreezeActiveWallet() {
+        // Given
+        Wallet wallet = Wallet.create(UUID.randomUUID(), Currency.getInstance("GBP"));
+
+        // When
+        wallet.freeze();
+
+        // Then
+        assertThat(wallet.getStatus()).isEqualTo(WalletStatus.FROZEN);
+    }
+
+    @Test
+    void shouldThrowWhenFreezingNonActiveWallet() {
+        // Given
+        Wallet wallet = Wallet.create(UUID.randomUUID(), Currency.getInstance("GBP"));
+        wallet.freeze();
+
+        // When / Then
+        assertThatThrownBy(wallet::freeze)
+                .isInstanceOf(IllegalStateException.class);
+    }
 }

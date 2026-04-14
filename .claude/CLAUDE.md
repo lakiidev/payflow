@@ -51,7 +51,7 @@ Self-invocation bypasses the AOP proxy — `@Transactional` silently does nothin
 ## Data Rules (quick ref)
 - Money: `BIGINT` cents — never `DECIMAL`, never `FLOAT`
 - PKs: `UUID` generated at domain layer, not by the DB
-- Balance: always derived (`SUM(ledger_entries)`), never a mutable column
+- Balance: cached `BIGINT` column on `wallets` for O(1) reads — ledger entries are the audit trail and source of truth; ledger is always written before the cached balance is updated; nightly reconciliation detects drift
 - Schema: Flyway only — `ddl-auto: validate` everywhere
 
 ## Hard Rules (never do these)

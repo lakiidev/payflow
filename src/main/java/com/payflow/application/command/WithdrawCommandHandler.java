@@ -60,12 +60,12 @@ public class WithdrawCommandHandler {
         );
         tx = idempotencyService.deduplicateOrSave(tx);
 
-        // STEP 5: debit first - checks balance AND updates currentBalance
+        // STEP 4: Ledger entry first — balanceAfter calculated before cache is mutated
+        ledgerService.createDebitEntry(tx, wallet, command.amountCents());
+
+        // STEP 5: Debit cached balance after the ledger is written
         wallet.debit(command.amountCents());
         walletRepository.save(wallet);
-
-        // STEP 4: Ledger entry after = balanceAfter is now correct
-        ledgerService.createDebitEntry(tx, wallet, command.amountCents());
 
         // STEP 6: Mark complete and persist
         tx.complete();
