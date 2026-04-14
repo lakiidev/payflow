@@ -4,6 +4,7 @@ import com.payflow.application.service.IdempotencyService;
 import com.payflow.application.service.LedgerService;
 import com.payflow.application.service.WalletService;
 import com.payflow.domain.model.transaction.CurrencyMismatchException;
+import com.payflow.domain.model.transaction.InvalidWalletOperationException;
 import com.payflow.domain.model.transaction.Transaction;
 import com.payflow.domain.model.transaction.TransactionType;
 import com.payflow.domain.model.wallet.Wallet;
@@ -46,7 +47,7 @@ public class TransferCommandHandler {
     private Transaction processNew(Command command) {
         // STEP 2: Validate — no self-transfer
         if (command.sourceWalletId().equals(command.destinationWalletId())) {
-            throw new IllegalArgumentException("Cannot transfer to the same wallet");
+            throw new InvalidWalletOperationException(command.sourceWalletId());
         }
 
         // STEP 3: Load both wallets — only a source needs ownership check
@@ -64,7 +65,8 @@ public class TransferCommandHandler {
                 command.sourceWalletId(),
                 command.destinationWalletId(),
                 command.amountCents(),
-                sourceWallet.getCurrency()
+                sourceWallet.getCurrency(),
+                command.requestingUserId()
         );
         tx = idempotencyService.deduplicateOrSave(tx);
 

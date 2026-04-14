@@ -55,7 +55,8 @@ public class WithdrawCommandHandler {
                 command.walletId(),
                 null,
                 command.amountCents(),
-                wallet.getCurrency()
+                wallet.getCurrency(),
+                command.requestingUserId()
         );
         tx = idempotencyService.deduplicateOrSave(tx);
 

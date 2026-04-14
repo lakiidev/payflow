@@ -46,15 +46,18 @@ public class Transaction {
     @CreationTimestamp
     private Instant createdAt;
 
-    @Column(nullable = true)
+    @Column
     private Instant completedAt;
+
+    @Column
+    private UUID userId;
 
     public void complete() {
         this.status = TransactionStatus.SUCCESS;
         this.completedAt = Instant.now();
     }
 
-    public static Transaction create(String idempotencyKey, TransactionType type, UUID fromWalletId, UUID toWalletId, Long amount, Currency currency) {
+    public static Transaction create(String idempotencyKey, TransactionType type, UUID fromWalletId, UUID toWalletId, Long amount, Currency currency, UUID userId) {
         Transaction transaction = new Transaction();
         transaction.idempotencyKey = idempotencyKey;
         transaction.type = type;
@@ -63,6 +66,7 @@ public class Transaction {
         transaction.amount = amount;
         transaction.currency = currency;
         transaction.status = TransactionStatus.PENDING;
+        transaction.userId = userId;
         return transaction;
     }
 }

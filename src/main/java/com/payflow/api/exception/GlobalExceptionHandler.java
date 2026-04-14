@@ -2,6 +2,8 @@ package com.payflow.api.exception;
 
 import com.payflow.api.dto.response.ErrorResponse;
 import com.payflow.domain.model.transaction.CurrencyMismatchException;
+import com.payflow.domain.model.transaction.InvalidWalletOperationException;
+import com.payflow.domain.model.transaction.TransactionNotFoundException;
 import com.payflow.domain.model.user.EmailAlreadyRegisteredException;
 import com.payflow.domain.model.wallet.InsufficientBalanceException;
 import com.payflow.domain.model.wallet.WalletAlreadyExistsException;
@@ -75,5 +77,16 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ErrorResponse handleLockTimeout(CannotAcquireLockException ex) {
         return new ErrorResponse("LOCK_TIMEOUT", "Service is under high load, please retry");
+    }
+
+    @ExceptionHandler(InvalidWalletOperationException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
+    public ErrorResponse handleInvalidWalletOperation(InvalidWalletOperationException ex) {
+        return new ErrorResponse("INVALID_WALLET_OPERATION", ex.getMessage());
+    }
+    @ExceptionHandler(TransactionNotFoundException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleTransactionNotFound(TransactionNotFoundException ex) {
+        return new ErrorResponse("TRANSACTION_NOT_FOUND", ex.getMessage());
     }
 }

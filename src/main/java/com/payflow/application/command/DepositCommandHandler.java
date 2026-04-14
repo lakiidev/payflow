@@ -53,7 +53,8 @@ public class DepositCommandHandler {
                 null,
                 command.walletId(),
                 command.amountCents(),
-                wallet.getCurrency()
+                wallet.getCurrency(),
+                command.requestingUserId()
         );
         tx = idempotencyService.deduplicateOrSave(tx);
 
