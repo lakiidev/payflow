@@ -7,7 +7,6 @@ import com.payflow.application.command.TransferCommandHandler;
 import com.payflow.application.command.WithdrawCommandHandler;
 import com.payflow.application.query.TransactionQueryHandler;
 import com.payflow.domain.model.user.User;
-import com.payflow.infrastructure.persistence.jpa.TransactionRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
