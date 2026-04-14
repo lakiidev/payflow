@@ -54,10 +54,10 @@ public class TransferCommandHandler {
 
         // STEP 3: Load both wallets — only source needs ownership check
         Wallet sourceWallet = walletService.getActiveById(command.sourceWalletId(), command.requestingUserId());
-        Wallet destionationWallet = walletRepository.findByIdAndStatus(command.destinationWalletId(), WalletStatus.ACTIVE)
+        Wallet destinationWallet = walletRepository.findByIdAndStatus(command.destinationWalletId(), WalletStatus.ACTIVE)
                 .orElseThrow(() -> new WalletNotFoundException(command.destinationWalletId()));
-        if (!sourceWallet.getCurrency().equals(destionationWallet.getCurrency())) {
-            throw new CurrencyMismatchException(sourceWallet.getCurrency(), destionationWallet.getCurrency());
+        if (!sourceWallet.getCurrency().equals(destinationWallet.getCurrency())) {
+            throw new CurrencyMismatchException(sourceWallet.getCurrency(), destinationWallet.getCurrency());
         }
 
 
@@ -79,9 +79,9 @@ public class TransferCommandHandler {
         walletRepository.save(sourceWallet);
 
         // STEP 6: Credit destination
-        ledgerService.createCreditEntry(tx, destionationWallet, command.amountCents());
-        destionationWallet.credit(command.amountCents());
-        walletRepository.save(destionationWallet);
+        ledgerService.createCreditEntry(tx, destinationWallet, command.amountCents());
+        destinationWallet.credit(command.amountCents());
+        walletRepository.save(destinationWallet);
 
         // STEP 7: Mark complete and persist
         tx.complete();
