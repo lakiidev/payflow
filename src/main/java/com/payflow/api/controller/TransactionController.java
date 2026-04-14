@@ -7,7 +7,6 @@ import com.payflow.application.command.TransferCommandHandler;
 import com.payflow.application.command.WithdrawCommandHandler;
 import com.payflow.application.query.TransactionQueryHandler;
 import com.payflow.domain.model.user.User;
-import com.payflow.infrastructure.persistence.jpa.TransactionRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -42,7 +41,7 @@ public class TransactionController {
         return transactionQueryHandler.handle(new TransactionQueryHandler.GetTransactionQuery(id, user.getId()));
     }
 
-    @PostMapping("/transactions/deposit")
+    @PostMapping("/deposit")
     public ResponseEntity<TransactionResponse> deposit(
             @RequestBody @Valid TransactionRequest.DepositRequest request,
             @AuthenticationPrincipal User user)
