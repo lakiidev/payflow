@@ -42,7 +42,7 @@ public class TransactionController {
         return transactionQueryHandler.handle(new TransactionQueryHandler.GetTransactionQuery(id, user.getId()));
     }
 
-    @PostMapping("/transactions/deposit")
+    @PostMapping("/deposit")
     public ResponseEntity<TransactionResponse> deposit(
             @RequestBody @Valid TransactionRequest.DepositRequest request,
             @AuthenticationPrincipal User user)
