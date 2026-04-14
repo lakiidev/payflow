@@ -65,7 +65,8 @@ public class TransferCommandHandler {
                 command.sourceWalletId(),
                 command.destinationWalletId(),
                 command.amountCents(),
-                sourceWallet.getCurrency()
+                sourceWallet.getCurrency(),
+                command.requestingUserId()
         );
         tx = idempotencyService.deduplicateOrSave(tx);
 

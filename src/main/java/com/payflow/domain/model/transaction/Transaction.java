@@ -57,7 +57,7 @@ public class Transaction {
         this.completedAt = Instant.now();
     }
 
-    public static Transaction create(String idempotencyKey, TransactionType type, UUID fromWalletId, UUID toWalletId, Long amount, Currency currency) {
+    public static Transaction create(String idempotencyKey, TransactionType type, UUID fromWalletId, UUID toWalletId, Long amount, Currency currency, UUID userId) {
         Transaction transaction = new Transaction();
         transaction.idempotencyKey = idempotencyKey;
         transaction.type = type;
@@ -66,6 +66,7 @@ public class Transaction {
         transaction.amount = amount;
         transaction.currency = currency;
         transaction.status = TransactionStatus.PENDING;
+        transaction.userId = userId;
         return transaction;
     }
 }
