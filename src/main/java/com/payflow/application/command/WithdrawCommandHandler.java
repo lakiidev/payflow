@@ -11,6 +11,10 @@ import com.payflow.infrastructure.kafka.TransactionOutboxWriter;
 import com.payflow.infrastructure.persistence.jpa.TransactionRepository;
 import com.payflow.infrastructure.persistence.jpa.WalletRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.PessimisticLockingFailureException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,13 +33,28 @@ public class WithdrawCommandHandler {
             UUID walletId,
             UUID requestingUserId,
             long amountCents
-    ) {}
+    ) {
+        public Command {
+            if (amountCents <= 0) {
+                throw new IllegalArgumentException("Withdraw amount must be positive, got: " + amountCents);
+            }
+        }
+    }
 
     private final IdempotencyService idempotencyService;
     private final TransactionRepository transactionRepository;
     private final LedgerService ledgerService;
     private final TransactionOutboxWriter eventPublisher;
 
+    @Retryable(
+            retryFor = {ObjectOptimisticLockingFailureException.class, PessimisticLockingFailureException.class},
+            maxAttemptsExpression = "${payflow.retry.max-attempts:3}",
+            backoff = @Backoff(
+                    delayExpression = "${payflow.retry.initial-interval-ms:100}",
+                    multiplierExpression = "${payflow.retry.multiplier:2.0}",
+                    maxDelayExpression = "${payflow.retry.max-interval-ms:1000}"
+            )
+    )
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public Transaction handle(Command command) {
         // STEP 1: Idempotency
@@ -58,16 +77,21 @@ public class WithdrawCommandHandler {
                 wallet.getCurrency(),
                 command.requestingUserId()
         );
+        // Handles concurrent duplicate race — unique constraint catches the second insert,
+        // deduplicateOrSave recovers by returning the existing transaction.
         tx = idempotencyService.deduplicateOrSave(tx);
 
-        // STEP 4: Ledger entry first — balanceAfter calculated before cache is mutated
+        // STEP 4: Validate balance before touching the ledger
+        wallet.validateSufficientBalance(command.amountCents());
+
+        // STEP 5: Ledger entry — balanceAfter calculated before cache is mutated
         ledgerService.createDebitEntry(tx, wallet, command.amountCents());
 
-        // STEP 5: Debit cached balance after the ledger is written
+        // STEP 6: Debit cached balance after the ledger is written
         wallet.debit(command.amountCents());
         walletRepository.save(wallet);
 
-        // STEP 6: Mark complete and persist
+        // STEP 7: Mark complete and persist
         tx.complete();
         eventPublisher.publishTransactionCreated(tx);
         return transactionRepository.save(tx);

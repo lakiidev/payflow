@@ -1,4 +1,4 @@
-# ADR-008: Optimistic locking over pessimistic locking on Wallet
+# ADR-006: Optimistic locking over pessimistic locking on Wallet
 
 ## Status
 Accepted — Week 1 (credit/debit implementation deferred to Week 3)
@@ -55,7 +55,8 @@ The two work together.
 ## Consequences
 - `wallets` table has a `version` column managed by Hibernate
 - Concurrent modifications to the same wallet result in a 409 — not a 500
-- Clients must implement retry logic for 409 on wallet operations
+- `@Retryable` on command handlers retries `ObjectOptimisticLockingFailureException`
+  transparently — the HTTP layer only sees a 409 if all retry attempts are exhausted
 - `ObjectOptimisticLockingFailureException` is mapped to HTTP 409 in the
   global exception handler
 - Under high contention on a single wallet, retry storms are theoretically

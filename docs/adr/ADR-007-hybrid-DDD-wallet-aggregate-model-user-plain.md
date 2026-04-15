@@ -1,4 +1,4 @@
-# ADR-009: Hybrid DDD — aggregate model for Wallet, plain entity for User
+# ADR-007: Hybrid DDD — aggregate model for Wallet, plain entity for User
 
 ## Status
 Accepted — Week 1 (credit/debit implementation deferred to Week 3)

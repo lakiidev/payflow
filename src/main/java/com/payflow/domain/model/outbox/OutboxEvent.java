@@ -1,10 +1,7 @@
 package com.payflow.domain.model.outbox;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
@@ -38,6 +35,7 @@ public class OutboxEvent {
     @Column(columnDefinition = "jsonb", nullable = false)
     private String payload;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OutboxEventStatus status;
@@ -51,7 +49,5 @@ public class OutboxEvent {
         this.status = OutboxEventStatus.PROCESSED;
         this.processedAt = Instant.now();
     }
-
-
 
 }

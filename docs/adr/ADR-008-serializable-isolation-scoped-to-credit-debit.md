@@ -1,4 +1,4 @@
-# ADR-011: SERIALIZABLE isolation scoped to credit/debit only, READ_COMMITTED for auth
+# ADR-008: SERIALIZABLE isolation scoped to credit/debit only, READ_COMMITTED for auth
 
 ## Status
 Accepted — Week 1 (credit/debit implementation deferred to Week 3)
@@ -53,7 +53,7 @@ and increases abort rates for no safety gain.
 Credit and debit operations modify `current_balance` — shared mutable financial
 state that multiple concurrent transactions can target simultaneously. This is
 exactly the scenario SERIALIZABLE isolation exists for. Combined with `@Version`
-optimistic locking (ADR-008), concurrent wallet mutations are both detected and
+optimistic locking (ADR-006), concurrent wallet mutations are both detected and
 prevented at the isolation level.
 
 
@@ -66,7 +66,7 @@ prevented at the isolation level.
 - Serialization failures on credit/debit result in transaction abort and
   retry — handled alongside `@Version` conflict retries
 - Auth throughput is unaffected by SERIALIZABLE overhead
-- Retry strategy for compounded SERIALIZABLE abort and @Version conflict
-    is deferred — a retry budget (max attempts) and exponential backoff
-    strategy will be defined in Week 3 when credit/debit handlers are
-    implemented. Unbounded retries under contention are a known risk
+- Both `PessimisticLockingFailureException` and `ObjectOptimisticLockingFailureException`
+  are retried via `@Retryable` on each command handler — max attempts and
+  exponential backoff are configurable via `payflow.retry.*` properties
+  (defaults: 3 attempts, 100 ms initial delay, 2× multiplier, 1 s cap)

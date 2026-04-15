@@ -1,15 +1,11 @@
 package com.payflow.infrastructure.kafka;
 
 import com.payflow.domain.model.outbox.OutboxEvent;
-import com.payflow.domain.model.outbox.OutboxEventStatus;
 import com.payflow.infrastructure.persistence.jpa.OutboxRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Limit;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,24 +13,25 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OutboxRelay {
 
-    private final OutboxRepository outboxRepository;
-    private final TransactionEventPublisher publisher; // producer
-
+    private final OutboxService outboxService;
+    private final TransactionEventPublisher publisher;
 
     @Value("${payflow.outbox.batch-size}")
     private Integer batchSize;
 
     @Scheduled(fixedDelayString = "${payflow.outbox.poll-interval-ms}")
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void relay() {
-        List<OutboxEvent> pending = outboxRepository
-                .findByStatusOrderByCreatedAtAsc(OutboxEventStatus.PENDING, Limit.of(batchSize));
+        List<OutboxEvent> events = outboxService.fetchAndMarkAsProcessing(batchSize);
 
-        for (OutboxEvent event : pending) {
-            publisher.publish(event);
-            event.markProcessed();
-            outboxRepository.save(event);
+        for (OutboxEvent event : events) {
+            try{
+                publisher.publish(event);
+                outboxService.markAsProcessed(event.getId());
+            }catch (Exception _){
+                outboxService.markAsFailed(event.getId());
+            }
         }
     }
+
 
 }

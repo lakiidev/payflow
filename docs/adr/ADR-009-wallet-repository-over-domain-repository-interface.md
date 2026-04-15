@@ -1,4 +1,4 @@
-# ADR-013: WalletRepository over domain repository interface until unit tests justify it
+# ADR-009: WalletRepository over domain repository interface until unit tests justify it
 ## Status
 Accepted — Week 1
 To be refactored in Week 3 — WalletQueryHandlerTest already mocks

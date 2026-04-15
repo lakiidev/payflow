@@ -8,6 +8,10 @@ import com.payflow.infrastructure.persistence.jpa.WalletRepository;
 import java.util.Currency;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.PessimisticLockingFailureException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +24,15 @@ public class CreateWalletCommandHandler {
 
     private final WalletRepository walletRepository;
 
+    @Retryable(
+            retryFor = {ObjectOptimisticLockingFailureException.class, PessimisticLockingFailureException.class},
+            maxAttemptsExpression = "${payflow.retry.max-attempts:3}",
+            backoff = @Backoff(
+                    delayExpression = "${payflow.retry.initial-interval-ms:100}",
+                    multiplierExpression = "${payflow.retry.multiplier:2.0}",
+                    maxDelayExpression = "${payflow.retry.max-interval-ms:1000}"
+            )
+    )
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public WalletResponse handle(Command command) {
         if (walletRepository.findByUserIdAndCurrency(command.userId(), command.currency()).isPresent()) {

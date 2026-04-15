@@ -8,6 +8,7 @@ import com.payflow.infrastructure.persistence.jpa.AuditLogRepository;
 import com.payflow.infrastructure.persistence.jpa.ProcessedEventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -27,7 +28,7 @@ public class AuditConsumer {
             topics = "${payflow.kafka.topics.transactions}",
             groupId = "${payflow.kafka.consumer.audit-group}"
     )
-    public void handle(String payload) {
+    public void handle(String payload, Acknowledgment ack ) {
         // insert into audit_logs table
         transactionTemplate.execute(
                 status -> {
@@ -35,7 +36,7 @@ public class AuditConsumer {
                         TransactionCreatedPayload event = objectMapper
                                 .readValue(payload,
                                         TransactionCreatedPayload.class);
-// Check
+                        // Check
                         if (processedEventRepository.existsById(event.transactionId())) {
                             return null;
                         }
@@ -60,5 +61,6 @@ public class AuditConsumer {
                     }
                 }
         );
+        ack.acknowledge();
     }
 }

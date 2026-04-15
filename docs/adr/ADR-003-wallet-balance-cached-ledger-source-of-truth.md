@@ -1,11 +1,11 @@
-# ADR-004: Wallet balance as cached field, ledger as source of truth
+# ADR-003: Wallet balance as cached field, ledger as source of truth
 
 ## Status
 Accepted — Week 1 (credit/debit implementation deferred to Week 3)
 
 ## Context
 System plans to use a double-entry ledger to record every financial movement as
-immutable `LedgerEntry` rows. (see why in future ADR) This raises a question: when the current balance
+immutable `LedgerEntry` rows. (see ADR-015) This raises a question: when the current balance
 of a wallet is needed, should it be derived by summing ledger entries at query
 time, or maintained as a cached field on the `Wallet` entity itself?
 
@@ -51,9 +51,9 @@ divergence.
 - `Wallet.credit()` and `Wallet.debit()` are the only mutation points —
   enforced by domain model design, not database constraints
 - `@Version` optimistic locking on `Wallet` guards against lost updates
-  under concurrent transactions (see ADR-008)
+  under concurrent transactions (see ADR-006)
 - SERIALIZABLE isolation on credit/debit handlers ensures ledger entry and
-  balance update are atomic (see ADR-011)
+  balance update are atomic (see ADR-008)
 - A reconciliation job comparing `current_balance` against summed ledger
   entries is deferred — frequency and alerting strategy to be decided
 
