@@ -21,14 +21,16 @@ public class OutboxRelay {
 
     @Scheduled(fixedDelayString = "${payflow.outbox.poll-interval-ms}")
     public void relay() {
-        List<OutboxEvent> events = outboxService.fetchAndMarkAsProcessing(batchSize);
+        List<OutboxEvent> events = outboxService.fetchPending(batchSize);
 
         for (OutboxEvent event : events) {
-            try{
+            try {
                 publisher.publish(event);
                 outboxService.markAsProcessed(event.getId());
-            }catch (Exception _){
-                outboxService.markAsFailed(event.getId());
+            } catch (Exception ignored) {
+                // leave as PENDING — retried on next poll
+                // TODO Week 3: add retry_count to outbox_events; mark FAILED after max retries
+                //  to prevent a poison-pill event retrying indefinitely
             }
         }
     }

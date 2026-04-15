@@ -18,11 +18,8 @@ public class OutboxService {
     private final OutboxRepository outboxRepository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public List<OutboxEvent> fetchAndMarkAsProcessing(Integer batchSize) {
-        List<OutboxEvent> pending = outboxRepository.findByStatusOrderByCreatedAtAsc(OutboxEventStatus.PENDING, Limit.of(batchSize));
-        pending.forEach(event->event.setStatus(OutboxEventStatus.PROCESSING));
-        outboxRepository.saveAll(pending);
-        return pending;
+    public List<OutboxEvent> fetchPending(Integer batchSize) {
+        return outboxRepository.findByStatusOrderByCreatedAtAsc(OutboxEventStatus.PENDING, Limit.of(batchSize));
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -32,10 +29,4 @@ public class OutboxService {
         });
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void markAsFailed(UUID id) {
-        outboxRepository.findById(id).ifPresent(event -> {
-            event.setStatus(OutboxEventStatus.FAILED); outboxRepository.save(event);
-        });
-    }
 }
