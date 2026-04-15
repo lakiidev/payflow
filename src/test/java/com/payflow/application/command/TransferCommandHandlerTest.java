@@ -8,6 +8,7 @@ import com.payflow.domain.model.transaction.InvalidWalletOperationException;
 import com.payflow.domain.model.transaction.Transaction;
 import com.payflow.domain.model.transaction.TransactionStatus;
 import com.payflow.domain.model.transaction.TransactionType;
+import com.payflow.domain.model.wallet.InsufficientBalanceException;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.domain.model.wallet.WalletNotFoundException;
 import com.payflow.domain.model.wallet.WalletStatus;
@@ -165,6 +166,22 @@ class TransferCommandHandlerTest {
         assertThatThrownBy(() -> handler.handle(command))
                 .isInstanceOf(WalletNotFoundException.class);
 
+        verifyNoInteractions(ledgerService, eventPublisher, transactionRepository);
+    }
+
+    @Test
+    void shouldThrowInsufficientBalanceWhenBalanceBelowAmount()
+    {
+        Wallet source = wallet(USER_ID, EUR, 10_000L);
+        Wallet dest   = wallet(UUID.randomUUID(), EUR, 5_000L);
+
+        when(idempotencyService.findDuplicate(any())).thenReturn(Optional.empty());
+        when(walletService.getActiveById(SOURCE_ID, USER_ID)).thenReturn(source);
+        when(walletRepository.findByIdAndStatus(DEST_ID, WalletStatus.ACTIVE)).thenReturn(Optional.of(dest));
+
+        var command = command(SOURCE_ID, DEST_ID, 10_001L);
+        assertThatThrownBy(() -> handler.handle(command))
+                .isInstanceOf(InsufficientBalanceException.class);
         verifyNoInteractions(ledgerService, eventPublisher, transactionRepository);
     }
 }

@@ -6,22 +6,22 @@ import java.util.UUID;
 
 public class TransactionRequest {
     public record DepositRequest(
-            UUID toWalletId,
+            @NotNull UUID toWalletId,
             @NotNull @Positive Long amount,          // cents
             String currency,
             @NotNull UUID idempotencyKey
     ) {}
 
     public  record WithdrawRequest(
-            UUID fromWalletId,
+            @NotNull UUID fromWalletId,
             @NotNull @Positive Long amount,          // cents
             String currency,
             @NotNull UUID idempotencyKey
     ) {}
 
     public record TransferRequest(
-            UUID fromWalletId,
-            UUID toWalletId,
+            @NotNull UUID fromWalletId,
+            @NotNull UUID toWalletId,
             @NotNull @Positive Long amount,          // cents
             String currency,
             @NotNull UUID idempotencyKey

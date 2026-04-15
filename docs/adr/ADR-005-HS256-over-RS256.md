@@ -1,4 +1,4 @@
-# ADR-006: HS256 over RS256 for JWT signing
+# ADR-005: HS256 over RS256 for JWT signing
 
 ## Status
 Accepted — Week 1
@@ -11,7 +11,7 @@ and operational overhead.
 
 ## Decision
 Use HS256 — a shared secret signs and verifies all tokens. A single secret
-key is configured via environment variable.
+key is configured via an environment variable.
 
 ## Alternatives Considered
 

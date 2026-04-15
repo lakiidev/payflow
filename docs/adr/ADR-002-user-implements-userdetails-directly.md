@@ -1,4 +1,4 @@
-# ADR-003: User implements UserDetails directly over a UserDetailsImpl wrapper
+# ADR-002: User implements UserDetails directly over a UserDetailsImpl wrapper
 
 ## Status
 Accepted Week 1
@@ -30,7 +30,7 @@ class that adapts `User` to the `UserDetails` interface.
 
 ## Rationale
 `User` is intentionally a plain `@Entity` rather than a full DDD
-aggregate — this was already established in ADR-009. Given that `User` carries
+aggregate — this was already established in comment on arhitecture. Given that `User` carries
 no domain invariants and no business logic worth protecting from framework
 coupling, the strict separation a wrapper provides has no practical payoff here.
 

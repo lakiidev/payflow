@@ -36,13 +36,13 @@ class WalletTest {
     }
 
     @Test
-    void shouldThrowWhenDebitExceedsBalance() {
+    void shouldThrowWhenValidateSufficientBalanceExceedsBalance() {
         // Given
         Wallet wallet = Wallet.create(UUID.randomUUID(), Currency.getInstance("GBP"));
         wallet.credit(100L);
 
         // When + Then
-        assertThatThrownBy(() -> wallet.debit(200L))
+        assertThatThrownBy(() -> wallet.validateSufficientBalance(200L))
                 .isInstanceOf(InsufficientBalanceException.class);
     }
 

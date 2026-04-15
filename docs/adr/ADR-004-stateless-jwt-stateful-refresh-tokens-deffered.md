@@ -1,4 +1,4 @@
-# ADR-005: Stateless JWT, stateful refresh tokens deferred to Week 3
+# ADR-004: Stateless JWT, stateful refresh tokens deferred to Week 3
 
 ## Status
 Accepted — Week 1 (stateful refresh token implementation deferred to Week 3)

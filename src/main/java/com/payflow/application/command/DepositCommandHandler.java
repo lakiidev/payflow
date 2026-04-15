@@ -8,7 +8,12 @@ import com.payflow.domain.model.transaction.TransactionType;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.infrastructure.kafka.TransactionOutboxWriter;
 import com.payflow.infrastructure.persistence.jpa.TransactionRepository;
+import com.payflow.infrastructure.persistence.jpa.WalletRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.PessimisticLockingFailureException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +43,17 @@ public class DepositCommandHandler {
     private final TransactionRepository transactionRepository;
     private final LedgerService ledgerService;
     private final TransactionOutboxWriter eventPublisher;
+    private final WalletRepository walletRepository;
 
+    @Retryable(
+            retryFor = {ObjectOptimisticLockingFailureException.class,PessimisticLockingFailureException .class},
+            maxAttemptsExpression = "${payflow.retry.max-attempts:3}",
+            backoff = @Backoff(
+                    delayExpression = "${payflow.retry.initial-interval-ms:100}",
+                    multiplierExpression = "${payflow.retry.multiplier:2.0}",
+                    maxDelayExpression = "${payflow.retry.max-interval-ms:1000}"
+            )
+    )
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public Transaction handle(Command command) {
         // STEP 1: Idempotency
@@ -69,6 +84,7 @@ public class DepositCommandHandler {
 
         // STEP 6: Update cached balance after the ledger is written
         wallet.credit(command.amountCents());
+        walletRepository.save(wallet);
 
         // STEP 7: Mark complete and persist
         tx.complete();

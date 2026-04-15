@@ -6,6 +6,7 @@ import com.payflow.application.service.WalletService;
 import com.payflow.domain.model.transaction.Transaction;
 import com.payflow.domain.model.transaction.TransactionStatus;
 import com.payflow.domain.model.transaction.TransactionType;
+import com.payflow.domain.model.wallet.InsufficientBalanceException;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.infrastructure.kafka.TransactionOutboxWriter;
 import com.payflow.infrastructure.persistence.jpa.TransactionRepository;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -104,5 +106,21 @@ class WithdrawCommandHandlerTest {
         // Then
         assertThat(result).isSameAs(existing);
         verifyNoInteractions(walletService, walletRepository, ledgerService, eventPublisher, transactionRepository);
+    }
+
+    @Test
+    void shouldThrowWhenInsufficientBalanceWhenBalanceBelowAmount() {
+        // Given
+        Wallet wallet = activeWallet(1000L);
+
+        when(idempotencyService.findDuplicate(any())).thenReturn(Optional.empty());
+        when(walletService.getActiveById(any(), any())).thenReturn(wallet);
+
+        // When / Then
+        var command = command(1001L);
+        assertThatThrownBy(() -> handler.handle(command))
+                .isInstanceOf(InsufficientBalanceException.class);
+
+        verifyNoInteractions(ledgerService, eventPublisher, transactionRepository);
     }
 }
