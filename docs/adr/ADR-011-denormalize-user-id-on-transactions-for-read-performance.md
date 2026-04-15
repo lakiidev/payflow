@@ -63,7 +63,7 @@ migration cost of removing it is low; the cost of the join it replaces is not.
 
 ## Consequences
 - `V12__Add_userId_to_transactions.sql` adds `user_id UUID REFERENCES users(id)`
-  and `CREATE INDEX idx_tx_user_id ON transactions(user_id) via `V13__create_user_id_index_transactions`
+  and `CREATE INDEX idx_tx_user_id ON transactions(user_id)` via `V13__create_user_id_index_transactions`
 - Command handlers populate `user_id` at write time from the authenticated principal
 - `TransactionRepository` exposes `findAllByUserId(UUID userId, Pageable pageable)`
   and `findByIdAndUserId(UUID id, UUID userId)` — no joins required
