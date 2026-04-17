@@ -6,14 +6,12 @@ import com.payflow.application.port.UserPort;
 import com.payflow.application.service.RefreshTokenService;
 import com.payflow.domain.model.token.RefreshToken;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class RefreshCommandHandler {
-    private final AuthenticationManager authenticationManager;
     private final TokenPort tokenPort;
     private final UserPort userPort;
     private final RefreshTokenService refreshTokenService;
