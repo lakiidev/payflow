@@ -9,7 +9,7 @@ import com.payflow.domain.model.transaction.TransactionType;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.infrastructure.kafka.TransactionOutboxWriter;
 import com.payflow.infrastructure.persistence.jpa.TransactionRepository;
-import com.payflow.infrastructure.persistence.jpa.WalletRepository;
+import com.payflow.infrastructure.persistence.jpa.WalletJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,7 +34,7 @@ class DepositCommandHandlerTest {
     private IdempotencyService idempotencyService;
 
     @Mock
-    private WalletRepository walletRepository;
+    private WalletJpaRepository walletRepository;
 
     @Mock
     private TransactionRepository transactionRepository;

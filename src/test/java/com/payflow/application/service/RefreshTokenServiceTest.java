@@ -71,7 +71,7 @@ class RefreshTokenServiceTest {
     }
 
 
-        @Test
+    @Test
     void shouldThrowWhenTokenExpired() {
         // Given
         RefreshToken expired = RefreshToken.builder()

@@ -8,7 +8,7 @@ import com.payflow.domain.model.transaction.TransactionType;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.infrastructure.kafka.TransactionOutboxWriter;
 import com.payflow.infrastructure.persistence.jpa.TransactionRepository;
-import com.payflow.infrastructure.persistence.jpa.WalletRepository;
+import com.payflow.infrastructure.persistence.jpa.WalletJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -43,7 +43,7 @@ public class DepositCommandHandler {
     private final TransactionRepository transactionRepository;
     private final LedgerService ledgerService;
     private final TransactionOutboxWriter eventPublisher;
-    private final WalletRepository walletRepository;
+    private final WalletJpaRepository walletRepository;
 
     @Retryable(
             retryFor = {ObjectOptimisticLockingFailureException.class,PessimisticLockingFailureException .class},

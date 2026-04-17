@@ -10,7 +10,7 @@ import com.payflow.domain.model.wallet.InsufficientBalanceException;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.infrastructure.kafka.TransactionOutboxWriter;
 import com.payflow.infrastructure.persistence.jpa.TransactionRepository;
-import com.payflow.infrastructure.persistence.jpa.WalletRepository;
+import com.payflow.infrastructure.persistence.jpa.WalletJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,7 +33,7 @@ class WithdrawCommandHandlerTest {
     private WalletService walletService;
 
     @Mock
-    private WalletRepository walletRepository;
+    private WalletJpaRepository walletRepository;
 
     @Mock
     private IdempotencyService idempotencyService;

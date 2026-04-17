@@ -3,7 +3,7 @@ package com.payflow.application.query.wallet;
 import com.payflow.api.dto.response.WalletResponse;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.domain.model.wallet.WalletNotFoundException;
-import com.payflow.infrastructure.persistence.jpa.WalletRepository;
+import com.payflow.domain.repository.WalletRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
