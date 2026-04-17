@@ -122,7 +122,7 @@ class RefreshTokenIntegrationTest {
         String hash = sha256Hex(rawRefreshToken);
         refreshTokenRepository.findByTokenHash(hash)
                 .ifPresent(token -> {
-                    token.setRevoked(true);
+                    token.revoke();
                     refreshTokenRepository.save(token);
                 });
 
