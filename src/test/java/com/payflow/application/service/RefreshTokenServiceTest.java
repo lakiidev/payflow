@@ -58,7 +58,7 @@ class RefreshTokenServiceTest {
         RefreshToken token2 = validToken(userId);
 
         // make token1 revoked
-        token1.setRevoked(true);
+        token1.revoke();
 
         // When
         when(refreshTokenRepository.findByTokenHash(any())).thenReturn(Optional.of(token1));
