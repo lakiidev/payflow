@@ -1,7 +1,6 @@
-package com.payflow.application.query;
+package com.payflow.application.command.auth;
 
 import com.payflow.api.dto.response.AuthenticationResponse;
-import com.payflow.application.command.LoginCommandHandler;
 import com.payflow.application.port.TokenPort;
 import com.payflow.application.service.RefreshTokenService;
 import com.payflow.domain.model.user.User;

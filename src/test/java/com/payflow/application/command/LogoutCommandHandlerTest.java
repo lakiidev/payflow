@@ -1,24 +1,32 @@
 package com.payflow.application.command;
 
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
+import com.payflow.application.command.auth.LogoutCommandHandler;
+import com.payflow.application.service.RefreshTokenService;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.util.UUID;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
 
+import static org.mockito.Mockito.verify;
+
+@ExtendWith(MockitoExtension.class)
 class LogoutCommandHandlerTest {
 
-    private final LogoutCommandHandler handler = new LogoutCommandHandler();
+    @Mock
+    private RefreshTokenService refreshTokenService;
 
-    @ParameterizedTest(name = "token={0}")
-    @NullSource
-    @ValueSource(strings = {"some.jwt.token"})
-    void handleCompletesForAnyToken(String token) {
-        // Week 1: no-op — jti unused until Week 3 Redis denylist
-        assertThatCode(() -> handler.handle(
-                new LogoutCommandHandler.Command(UUID.randomUUID(), token)))
-                .doesNotThrowAnyException();
+    @InjectMocks
+    private LogoutCommandHandler handler;
+
+    @Test
+    void shouldRevokeRefreshTokenOnLogout() {
+        String rawToken = "some-raw-token";
+
+        handler.handle(new LogoutCommandHandler.Command(rawToken));
+
+        verify(refreshTokenService).revoke(rawToken);
     }
 }

@@ -1,4 +1,4 @@
-package com.payflow.application.command;
+package com.payflow.application.command.auth;
 
 import com.payflow.api.dto.response.AuthenticationResponse;
 import com.payflow.application.port.TokenPort;

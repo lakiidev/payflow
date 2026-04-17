@@ -1,15 +1,12 @@
-package com.payflow.application.command;
+package com.payflow.application.command.transactions;
+
 
 import com.payflow.application.service.IdempotencyService;
 import com.payflow.application.service.LedgerService;
 import com.payflow.application.service.WalletService;
-import com.payflow.domain.model.transaction.CurrencyMismatchException;
-import com.payflow.domain.model.transaction.InvalidWalletOperationException;
 import com.payflow.domain.model.transaction.Transaction;
 import com.payflow.domain.model.transaction.TransactionType;
 import com.payflow.domain.model.wallet.Wallet;
-import com.payflow.domain.model.wallet.WalletNotFoundException;
-import com.payflow.domain.model.wallet.WalletStatus;
 import com.payflow.infrastructure.kafka.TransactionOutboxWriter;
 import com.payflow.infrastructure.persistence.jpa.TransactionRepository;
 import com.payflow.infrastructure.persistence.jpa.WalletRepository;
@@ -26,25 +23,25 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class TransferCommandHandler {
+public class WithdrawCommandHandler {
+
     private final WalletService walletService;
+    private final WalletRepository walletRepository;
 
     public record Command(
             String idempotencyKey,
-            UUID sourceWalletId,
-            UUID destinationWalletId,
+            UUID walletId,
             UUID requestingUserId,
             long amountCents
     ) {
         public Command {
             if (amountCents <= 0) {
-                throw new IllegalArgumentException("Transfer amount must be positive, got: " + amountCents);
+                throw new IllegalArgumentException("Withdraw amount must be positive, got: " + amountCents);
             }
         }
     }
 
     private final IdempotencyService idempotencyService;
-    private final WalletRepository walletRepository;
     private final TransactionRepository transactionRepository;
     private final LedgerService ledgerService;
     private final TransactionOutboxWriter eventPublisher;
@@ -66,45 +63,35 @@ public class TransferCommandHandler {
     }
 
     private Transaction processNew(Command command) {
-        // STEP 2: Validate — no self-transfer
-        if (command.sourceWalletId().equals(command.destinationWalletId())) {
-            throw new InvalidWalletOperationException(command.sourceWalletId());
-        }
+        // STEP 2: Load & validate wallet — ownership + active status
+        Wallet wallet = walletService.getActiveById(command.walletId(),command.requestingUserId());
 
-        // STEP 3: Load both wallets — only source needs ownership check
-        Wallet sourceWallet = walletService.getActiveById(command.sourceWalletId(), command.requestingUserId());
-        Wallet destinationWallet = walletRepository.findByIdAndStatus(command.destinationWalletId(), WalletStatus.ACTIVE)
-                .orElseThrow(() -> new WalletNotFoundException(command.destinationWalletId()));
-        if (!sourceWallet.getCurrency().equals(destinationWallet.getCurrency())) {
-            throw new CurrencyMismatchException(sourceWallet.getCurrency(), destinationWallet.getCurrency());
-        }
 
-        // STEP 4: Create a PENDING transaction record
+        // STEP 3: Create a PENDING transaction record
         Transaction tx = Transaction.create(
                 command.idempotencyKey(),
-                TransactionType.TRANSFER,
-                command.sourceWalletId(),
-                command.destinationWalletId(),
+                TransactionType.WITHDRAW,
+                command.walletId(),
+                null,
                 command.amountCents(),
-                sourceWallet.getCurrency(),
+                wallet.getCurrency(),
                 command.requestingUserId()
         );
+        // Handles concurrent duplicate race — unique constraint catches the second insert,
+        // deduplicateOrSave recovers by returning the existing transaction.
         tx = idempotencyService.deduplicateOrSave(tx);
 
-        // STEP 5: Validate source balance before touching the ledger
-        sourceWallet.validateSufficientBalance(command.amountCents());
+        // STEP 4: Validate balance before touching the ledger
+        wallet.validateSufficientBalance(command.amountCents());
 
-        // STEP 6: Debit source — ledger first, then mutate cached balance
-        ledgerService.createDebitEntry(tx, sourceWallet, command.amountCents());
-        sourceWallet.debit(command.amountCents());
-        walletRepository.save(sourceWallet);
+        // STEP 5: Ledger entry — balanceAfter calculated before cache is mutated
+        ledgerService.createDebitEntry(tx, wallet, command.amountCents());
 
-        // STEP 7: Credit destination
-        ledgerService.createCreditEntry(tx, destinationWallet, command.amountCents());
-        destinationWallet.credit(command.amountCents());
-        walletRepository.save(destinationWallet);
+        // STEP 6: Debit cached balance after the ledger is written
+        wallet.debit(command.amountCents());
+        walletRepository.save(wallet);
 
-        // STEP 8: Mark complete and persist
+        // STEP 7: Mark complete and persist
         tx.complete();
         eventPublisher.publishTransactionCreated(tx);
         return transactionRepository.save(tx);
