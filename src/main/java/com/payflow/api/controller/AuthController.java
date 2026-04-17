@@ -6,8 +6,9 @@ import com.payflow.api.dto.request.RegisterRequest;
 import com.payflow.api.dto.response.AuthenticationResponse;
 import com.payflow.api.dto.response.UserProfileResponse;
 import com.payflow.application.command.LogoutCommandHandler;
+import com.payflow.application.command.RefreshCommandHandler;
 import com.payflow.application.command.RegisterCommandHandler;
-import com.payflow.application.query.AuthQueryHandler;
+import com.payflow.application.command.LoginCommandHandler;
 import com.payflow.application.query.GetCurrentUserQueryHandler;
 import com.payflow.domain.model.user.User;
 import com.payflow.infrastructure.security.JwtService;
@@ -24,8 +25,9 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final RegisterCommandHandler registerCommandHandler;
-    private final AuthQueryHandler authenticationQueryHandler;
+    private final LoginCommandHandler authenticationQueryHandler;
     private final LogoutCommandHandler logoutCommandHandler;
+    private final RefreshCommandHandler refreshCommandHandler;
     private final GetCurrentUserQueryHandler getCurrentUserQueryHandler;
     private final JwtService jwtService;
 
@@ -40,7 +42,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public AuthenticationResponse login(@Valid @RequestBody LoginRequest request) {
-        return authenticationQueryHandler.handle(new AuthQueryHandler.Query(
+        return authenticationQueryHandler.handle(new LoginCommandHandler.Command(
                 request.getEmail(),
                 request.getPassword()
         ));
@@ -48,7 +50,9 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public AuthenticationResponse refresh(@Valid @RequestBody RefreshRequest request) {
-        return authenticationQueryHandler.handleRefresh(request.getRefreshToken());
+        return refreshCommandHandler.handle(new RefreshCommandHandler.Command(
+                request.getRefreshToken()
+        ));
     }
 
     @GetMapping("/me")

@@ -1,6 +1,7 @@
 package com.payflow.api.exception;
 
 import com.payflow.api.dto.response.ErrorResponse;
+import com.payflow.domain.model.token.InvalidRefreshTokenException;
 import com.payflow.domain.model.transaction.CurrencyMismatchException;
 import com.payflow.domain.model.transaction.InvalidWalletOperationException;
 import com.payflow.domain.model.transaction.TransactionNotFoundException;
@@ -103,5 +104,11 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleTransactionNotFound(TransactionNotFoundException ex) {
         return new ErrorResponse("TRANSACTION_NOT_FOUND", ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleInvalidRefreshToken(InvalidRefreshTokenException ex) {
+        return new ErrorResponse("INVALID_REFRESH_TOKEN", ex.getMessage());
     }
 }

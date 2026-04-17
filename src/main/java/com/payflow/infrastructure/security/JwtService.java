@@ -1,6 +1,6 @@
 package com.payflow.infrastructure.security;
 
-import com.payflow.application.service.TokenService;
+import com.payflow.application.port.TokenPort;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.function.Function;
 
 @Service
-public class JwtService extends TokenService {
+public class JwtService extends TokenService implements TokenPort {
 
 
     public boolean validateToken(String token, UserDetails userDetails) {
