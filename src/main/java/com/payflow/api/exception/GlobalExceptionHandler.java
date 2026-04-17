@@ -1,6 +1,7 @@
 package com.payflow.api.exception;
 
 import com.payflow.api.dto.response.ErrorResponse;
+import com.payflow.domain.model.token.InvalidRefreshTokenException;
 import com.payflow.domain.model.transaction.CurrencyMismatchException;
 import com.payflow.domain.model.transaction.InvalidWalletOperationException;
 import com.payflow.domain.model.transaction.TransactionNotFoundException;
@@ -9,17 +10,20 @@ import com.payflow.domain.model.wallet.InsufficientBalanceException;
 import com.payflow.domain.model.wallet.WalletAlreadyExistsException;
 import com.payflow.domain.model.wallet.WalletAlreadyFrozenException;
 import com.payflow.domain.model.wallet.WalletNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(WalletNotFoundException.class)
@@ -34,9 +38,20 @@ public class GlobalExceptionHandler {
         return new ErrorResponse("CONCURRENT_MODIFICATION", "Resource was modified by another request, please retry");
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleValidation(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .map(e -> e.getField() + ": " + e.getDefaultMessage())
+                .findFirst()
+                .orElse("Invalid request");
+        return new ErrorResponse("VALIDATION_ERROR", message);
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleGeneric(Exception ex) {
+        log.error("Unexpected error: {}", ex.getMessage(), ex);
         return new ErrorResponse("INTERNAL_ERROR", "An unexpected error occurred");
     }
 
@@ -103,5 +118,17 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleTransactionNotFound(TransactionNotFoundException ex) {
         return new ErrorResponse("TRANSACTION_NOT_FOUND", ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleInvalidRefreshToken(InvalidRefreshTokenException ex) {
+        return new ErrorResponse("INVALID_REFRESH_TOKEN", ex.getMessage());
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleBadCredentials(BadCredentialsException ex) {
+        return new ErrorResponse("INVALID_CREDENTIALS", "Invalid email or password");
     }
 }

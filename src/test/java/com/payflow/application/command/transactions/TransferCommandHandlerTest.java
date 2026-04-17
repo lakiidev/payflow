@@ -1,4 +1,4 @@
-package com.payflow.application.command;
+package com.payflow.application.command.transactions;
 
 import com.payflow.application.service.IdempotencyService;
 import com.payflow.application.service.LedgerService;

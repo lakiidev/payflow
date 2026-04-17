@@ -1,12 +1,13 @@
-package com.payflow.application.command;
+package com.payflow.application.command.auth;
 
 import com.payflow.api.dto.response.AuthenticationResponse;
+import com.payflow.application.port.TokenPort;
+import com.payflow.application.service.RefreshTokenService;
 import com.payflow.domain.model.user.EmailAlreadyRegisteredException;
 import com.payflow.domain.model.user.User;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.infrastructure.persistence.jpa.UserRepository;
 import com.payflow.infrastructure.persistence.jpa.WalletRepository;
-import com.payflow.infrastructure.security.JwtService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,7 +37,10 @@ class RegisterCommandHandlerTest {
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private JwtService jwtService;
+    private TokenPort tokenPort;
+
+    @Mock
+    private RefreshTokenService refreshTokenService;
 
     @InjectMocks
     private RegisterCommandHandler handler;
@@ -51,8 +55,8 @@ class RegisterCommandHandlerTest {
         );
         when(userRepository.existsByEmail(command.email())).thenReturn(false);
         when(passwordEncoder.encode(any())).thenReturn("hashed_password");
-        when(jwtService.generateAccessToken(any())).thenReturn("access-token");
-        when(jwtService.generateRefreshToken(any())).thenReturn("refresh-token");
+        when(tokenPort.generateAccessToken(any())).thenReturn("access-token");
+        when(refreshTokenService.issue(any())).thenReturn("refresh-token");
 
         // When
         AuthenticationResponse response = handler.handle(command);

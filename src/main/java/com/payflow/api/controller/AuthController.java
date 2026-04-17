@@ -1,17 +1,18 @@
 package com.payflow.api.controller;
 
 import com.payflow.api.dto.request.LoginRequest;
+import com.payflow.api.dto.request.LogoutRequest;
 import com.payflow.api.dto.request.RefreshRequest;
 import com.payflow.api.dto.request.RegisterRequest;
 import com.payflow.api.dto.response.AuthenticationResponse;
 import com.payflow.api.dto.response.UserProfileResponse;
-import com.payflow.application.command.LogoutCommandHandler;
-import com.payflow.application.command.RegisterCommandHandler;
-import com.payflow.application.query.AuthQueryHandler;
+import com.payflow.application.command.auth.LogoutCommandHandler;
+import com.payflow.application.command.auth.RefreshCommandHandler;
+import com.payflow.application.command.auth.RegisterCommandHandler;
+import com.payflow.application.command.auth.LoginCommandHandler;
 import com.payflow.application.query.GetCurrentUserQueryHandler;
 import com.payflow.domain.model.user.User;
 import com.payflow.infrastructure.security.JwtService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +25,9 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final RegisterCommandHandler registerCommandHandler;
-    private final AuthQueryHandler authenticationQueryHandler;
+    private final LoginCommandHandler authenticationQueryHandler;
     private final LogoutCommandHandler logoutCommandHandler;
+    private final RefreshCommandHandler refreshCommandHandler;
     private final GetCurrentUserQueryHandler getCurrentUserQueryHandler;
     private final JwtService jwtService;
 
@@ -40,7 +42,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public AuthenticationResponse login(@Valid @RequestBody LoginRequest request) {
-        return authenticationQueryHandler.handle(new AuthQueryHandler.Query(
+        return authenticationQueryHandler.handle(new LoginCommandHandler.Command(
                 request.getEmail(),
                 request.getPassword()
         ));
@@ -48,7 +50,9 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public AuthenticationResponse refresh(@Valid @RequestBody RefreshRequest request) {
-        return authenticationQueryHandler.handleRefresh(request.getRefreshToken());
+        return refreshCommandHandler.handle(new RefreshCommandHandler.Command(
+                request.getRefreshToken()
+        ));
     }
 
     @GetMapping("/me")
@@ -58,10 +62,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@AuthenticationPrincipal User user, HttpServletRequest request) {
-        // Week 3: replace with jwtService.extractJti(token) for Redis denylist key
-        String token = jwtService.extractBearerToken(request.getHeader("Authorization"));
-        logoutCommandHandler.handle(new LogoutCommandHandler.Command(user.getId(), token));
+    public ResponseEntity<Void> logout(@RequestBody LogoutRequest request) {
+        logoutCommandHandler.handle(new LogoutCommandHandler.Command(request.refreshToken()));
         return ResponseEntity.noContent().build();
     }
 }

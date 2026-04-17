@@ -2,9 +2,9 @@ package com.payflow.api.controller;
 
 import com.payflow.api.dto.request.TransactionRequest;
 import com.payflow.api.dto.response.TransactionResponse;
-import com.payflow.application.command.DepositCommandHandler;
-import com.payflow.application.command.TransferCommandHandler;
-import com.payflow.application.command.WithdrawCommandHandler;
+import com.payflow.application.command.transactions.DepositCommandHandler;
+import com.payflow.application.command.transactions.TransferCommandHandler;
+import com.payflow.application.command.transactions.WithdrawCommandHandler;
 import com.payflow.application.query.TransactionQueryHandler;
 import com.payflow.domain.model.user.User;
 import jakarta.validation.Valid;

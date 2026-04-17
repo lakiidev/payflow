@@ -1,4 +1,4 @@
-package com.payflow.application.command;
+package com.payflow.application.command.wallet;
 
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.domain.model.wallet.WalletNotFoundException;

@@ -1,9 +1,11 @@
-package com.payflow.application.command;
+package com.payflow.application.command.wallet;
 
+import com.payflow.api.dto.response.WalletResponse;
 import com.payflow.domain.model.wallet.Wallet;
-import com.payflow.domain.model.wallet.WalletNotFoundException;
+import com.payflow.domain.model.wallet.WalletAlreadyExistsException;
 import com.payflow.infrastructure.persistence.jpa.WalletRepository;
 
+import java.util.Currency;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.PessimisticLockingFailureException;
@@ -16,9 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class FreezeWalletCommandHandler {
+public class CreateWalletCommandHandler {
 
-    public record Command(UUID walletId, UUID userId) {}
+    public record Command(UUID userId, Currency currency) {}
 
     private final WalletRepository walletRepository;
 
@@ -32,11 +34,12 @@ public class FreezeWalletCommandHandler {
             )
     )
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public void handle(Command command) {
-        Wallet wallet = walletRepository.findByIdAndUserId(command.walletId(), command.userId())
-                .orElseThrow(() -> new WalletNotFoundException(command.walletId()));
-
-        wallet.freeze();
+    public WalletResponse handle(Command command) {
+        if (walletRepository.findByUserIdAndCurrency(command.userId(), command.currency()).isPresent()) {
+            throw new WalletAlreadyExistsException(command.userId(), command.currency());
+        }
+        Wallet wallet = Wallet.create(command.userId(), command.currency());
         walletRepository.save(wallet);
+        return WalletResponse.from(wallet);
     }
 }
