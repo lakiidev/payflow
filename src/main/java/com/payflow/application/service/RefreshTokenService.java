@@ -69,8 +69,10 @@ public class RefreshTokenService {
     public void revokeAllByUserId(UUID userId) {
         refreshTokenRepository.findAllByUserId(userId)
                 .forEach(token -> {
-                    token.revoke();
-                    refreshTokenRepository.save(token);
+                    if (!token.isRevoked()) {
+                        token.revoke();
+                        refreshTokenRepository.save(token);
+                    }
                 });
     }
 
