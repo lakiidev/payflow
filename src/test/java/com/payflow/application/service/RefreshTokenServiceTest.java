@@ -57,10 +57,8 @@ class RefreshTokenServiceTest {
         RefreshToken token1 = validToken(userId);
         RefreshToken token2 = validToken(userId);
 
-        // make token1 revoked
-        token1.revoke();
+        token1.revoke(); // already revoked — should be skipped
 
-        // When
         when(refreshTokenRepository.findByTokenHash(any())).thenReturn(Optional.of(token1));
         when(refreshTokenRepository.findAllByUserId(userId)).thenReturn(List.of(token1, token2));
 
@@ -68,11 +66,12 @@ class RefreshTokenServiceTest {
         assertThatThrownBy(() -> refreshTokenService.validate("raw-token"))
                 .isInstanceOf(InvalidRefreshTokenException.class);
 
-        verify(refreshTokenRepository, times(2)).save(argThat(RefreshToken::isRevoked));
+        verify(refreshTokenRepository, times(1)).save(argThat(RefreshToken::isRevoked));
+        verify(refreshTokenRepository, never()).save(token1); // already revoked, not persisted again
     }
 
 
-    @Test
+        @Test
     void shouldThrowWhenTokenExpired() {
         // Given
         RefreshToken expired = RefreshToken.builder()
