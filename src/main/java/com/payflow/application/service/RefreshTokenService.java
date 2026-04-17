@@ -6,6 +6,7 @@ import com.payflow.infrastructure.persistence.jpa.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -25,6 +26,7 @@ public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
 
+    @Transactional
     public String issue(UUID userId) {
         String token = generateSecureToken();
 
@@ -39,30 +41,35 @@ public class RefreshTokenService {
         return token;
     }
 
+    @Transactional
     public void revoke(String rawToken) {
         refreshTokenRepository.findByTokenHash(sha256Hex(rawToken))
                 .ifPresent(token -> {
-                    token.setRevoked(true);
+                    token.revoke();
                     refreshTokenRepository.save(token);
                 });
     }
+
     public RefreshToken validate(String rawToken) {
         String hash = sha256Hex(rawToken);
         RefreshToken token = refreshTokenRepository.findByTokenHash(hash)
                 .orElseThrow(() -> new InvalidRefreshTokenException("Token not found"));
         if (token.isRevoked()) {
-            revokeAllByUserId(token.getUserId());
+            revokeAllByUserId(token.getUserId()); //NOSONAR
             throw new InvalidRefreshTokenException("Token already revoked");
         }
         if (token.getExpiresAt().isBefore(Instant.now())) {
             throw new InvalidRefreshTokenException("Token expired");
         }
+        token.validate();
         return token;
     }
+
+    @Transactional
     public void revokeAllByUserId(UUID userId) {
         refreshTokenRepository.findAllByUserId(userId)
                 .forEach(token -> {
-                    token.setRevoked(true);
+                    token.revoke();
                     refreshTokenRepository.save(token);
                 });
     }

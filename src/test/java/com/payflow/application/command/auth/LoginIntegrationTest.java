@@ -6,12 +6,15 @@ import com.payflow.api.dto.request.LoginRequest;
 import com.payflow.api.dto.request.RegisterRequest;
 import com.payflow.infrastructure.persistence.jpa.UserRepository;
 import com.payflow.infrastructure.persistence.jpa.WalletRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.client.RestTestClient;
+
+import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
@@ -23,11 +26,15 @@ class LoginIntegrationTest {
     @Autowired private UserRepository userRepository;
     @Autowired private WalletRepository walletRepository;
 
-    private void registerUser(String email) {
+    private String userEmail;
+
+    @BeforeEach
+    void setUp() {
+        userEmail = "login-" + UUID.randomUUID() + "@payflow.com";
         restTestClient.post()
                 .uri("/api/v1/auth/register")
                 .body(RegisterRequest.builder()
-                        .email(email)
+                        .email(userEmail)
                         .password("password123")
                         .fullName("Test User")
                         .build())
@@ -35,16 +42,15 @@ class LoginIntegrationTest {
                 .expectStatus().isOk();
     }
 
+
     @Test
     void shouldLoginUserAndReturnTokens() {
-        // Setup
-        registerUser("login-happy@payflow.com");
 
         // When
         restTestClient.post()
                 .uri("/api/v1/auth/login")
                 .body(LoginRequest.builder()
-                        .email("login-happy@payflow.com")
+                        .email(userEmail)
                         .password("password123")
                         .build()
                 )
@@ -54,12 +60,11 @@ class LoginIntegrationTest {
 
     @Test
     void shouldReturn401WithWrongPassword() {
-        registerUser("login-wrong@payflow.com");
 
         restTestClient.post()
                 .uri("/api/v1/auth/login")
                 .body(LoginRequest.builder()
-                        .email("login-wrong@payflow.com")
+                        .email(userEmail)
                         .password("wrongpassword")
                         .build())
                 .exchange()
@@ -68,12 +73,11 @@ class LoginIntegrationTest {
 
     @Test
     void shouldReturn401WithWrongEmail() {
-        registerUser("login-wrong@payflow.com");
 
         restTestClient.post()
                 .uri("/api/v1/auth/login")
                 .body(LoginRequest.builder()
-                        .email("login-wrong-mail@payflow.com")
+                        .email("nonexistent@payflow.com")
                         .password("password123")
                         .build())
                 .exchange()
