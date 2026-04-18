@@ -5,7 +5,7 @@ import com.payflow.api.dto.request.LogoutRequest;
 import com.payflow.api.dto.request.RegisterRequest;
 import com.payflow.api.dto.response.AuthenticationResponse;
 import com.payflow.domain.model.token.RefreshToken;
-import com.payflow.infrastructure.persistence.jpa.RefreshTokenRepository;
+import com.payflow.domain.repository.RefreshTokenRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;

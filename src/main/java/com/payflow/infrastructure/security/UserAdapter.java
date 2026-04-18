@@ -1,7 +1,7 @@
 package com.payflow.infrastructure.security;
 
 import com.payflow.application.port.UserPort;
-import com.payflow.infrastructure.persistence.jpa.UserRepository;
+import com.payflow.infrastructure.persistence.jpa.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,7 +14,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserAdapter implements UserDetailsService, UserPort {
 
-    private final UserRepository userRepository;
+    private final UserJpaRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) {

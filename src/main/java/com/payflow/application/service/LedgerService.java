@@ -4,7 +4,7 @@ import com.payflow.domain.model.ledger.EntryType;
 import com.payflow.domain.model.ledger.LedgerEntry;
 import com.payflow.domain.model.transaction.Transaction;
 import com.payflow.domain.model.wallet.Wallet;
-import com.payflow.infrastructure.persistence.jpa.LedgerEntryRepository;
+import com.payflow.domain.repository.LedgerEntryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

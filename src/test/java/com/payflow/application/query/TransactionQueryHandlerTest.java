@@ -1,7 +1,7 @@
 package com.payflow.application.query;
 
 import com.payflow.domain.model.transaction.TransactionNotFoundException;
-import com.payflow.infrastructure.persistence.jpa.TransactionRepository;
+import com.payflow.domain.repository.TransactionRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

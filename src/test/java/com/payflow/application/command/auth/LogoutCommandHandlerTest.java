@@ -1,6 +1,5 @@
-package com.payflow.application.command;
+package com.payflow.application.command.auth;
 
-import com.payflow.application.command.auth.LogoutCommandHandler;
 import com.payflow.application.service.RefreshTokenService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

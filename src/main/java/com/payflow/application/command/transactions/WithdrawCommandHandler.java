@@ -7,9 +7,9 @@ import com.payflow.application.service.WalletService;
 import com.payflow.domain.model.transaction.Transaction;
 import com.payflow.domain.model.transaction.TransactionType;
 import com.payflow.domain.model.wallet.Wallet;
+import com.payflow.domain.repository.TransactionRepository;
+import com.payflow.domain.repository.WalletRepository;
 import com.payflow.infrastructure.kafka.TransactionOutboxWriter;
-import com.payflow.infrastructure.persistence.jpa.TransactionRepository;
-import com.payflow.infrastructure.persistence.jpa.WalletJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -26,7 +26,7 @@ import java.util.UUID;
 public class WithdrawCommandHandler {
 
     private final WalletService walletService;
-    private final WalletJpaRepository walletRepository;
+    private final WalletRepository walletRepository;
 
     public record Command(
             String idempotencyKey,

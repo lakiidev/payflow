@@ -4,7 +4,7 @@ package com.payflow.application.command.auth;
 import com.payflow.TestcontainersConfiguration;
 import com.payflow.api.dto.request.LoginRequest;
 import com.payflow.api.dto.request.RegisterRequest;
-import com.payflow.infrastructure.persistence.jpa.UserRepository;
+import com.payflow.domain.repository.UserRepository;
 import com.payflow.infrastructure.persistence.jpa.WalletJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -2,7 +2,7 @@ package com.payflow.application.service;
 
 import com.payflow.domain.model.transaction.Transaction;
 import com.payflow.domain.model.transaction.TransactionType;
-import com.payflow.infrastructure.persistence.jpa.TransactionRepository;
+import com.payflow.domain.repository.TransactionRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -2,7 +2,7 @@ package com.payflow.infrastructure.kafka;
 
 import com.payflow.domain.model.outbox.OutboxEvent;
 import com.payflow.domain.model.outbox.OutboxEventStatus;
-import com.payflow.infrastructure.persistence.jpa.OutboxRepository;
+import com.payflow.domain.repository.OutboxRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;

@@ -6,8 +6,8 @@ import com.payflow.application.service.RefreshTokenService;
 import com.payflow.domain.model.user.EmailAlreadyRegisteredException;
 import com.payflow.domain.model.user.User;
 import com.payflow.domain.model.wallet.Wallet;
-import com.payflow.infrastructure.persistence.jpa.UserRepository;
-import com.payflow.infrastructure.persistence.jpa.WalletJpaRepository;
+import com.payflow.domain.repository.UserRepository;
+import com.payflow.domain.repository.WalletRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,7 +31,7 @@ class RegisterCommandHandlerTest {
     private UserRepository userRepository;
 
     @Mock
-    private WalletJpaRepository walletRepository;
+    private WalletRepository walletRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;

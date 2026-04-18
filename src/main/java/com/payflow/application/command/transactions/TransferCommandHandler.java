@@ -10,9 +10,9 @@ import com.payflow.domain.model.transaction.TransactionType;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.domain.model.wallet.WalletNotFoundException;
 import com.payflow.domain.model.wallet.WalletStatus;
+import com.payflow.domain.repository.TransactionRepository;
+import com.payflow.domain.repository.WalletRepository;
 import com.payflow.infrastructure.kafka.TransactionOutboxWriter;
-import com.payflow.infrastructure.persistence.jpa.TransactionRepository;
-import com.payflow.infrastructure.persistence.jpa.WalletJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -44,7 +44,7 @@ public class TransferCommandHandler {
     }
 
     private final IdempotencyService idempotencyService;
-    private final WalletJpaRepository walletRepository;
+    private final WalletRepository walletRepository;
     private final TransactionRepository transactionRepository;
     private final LedgerService ledgerService;
     private final TransactionOutboxWriter eventPublisher;

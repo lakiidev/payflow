@@ -12,9 +12,9 @@ import com.payflow.domain.model.wallet.InsufficientBalanceException;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.domain.model.wallet.WalletNotFoundException;
 import com.payflow.domain.model.wallet.WalletStatus;
+import com.payflow.domain.repository.TransactionRepository;
+import com.payflow.domain.repository.WalletRepository;
 import com.payflow.infrastructure.kafka.TransactionOutboxWriter;
-import com.payflow.infrastructure.persistence.jpa.TransactionRepository;
-import com.payflow.infrastructure.persistence.jpa.WalletJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,7 +37,7 @@ class TransferCommandHandlerTest {
     private WalletService walletService;
 
     @Mock
-    private WalletJpaRepository walletRepository;
+    private WalletRepository walletRepository;
 
     @Mock
     private IdempotencyService idempotencyService;

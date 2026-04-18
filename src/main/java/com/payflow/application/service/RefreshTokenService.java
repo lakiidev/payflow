@@ -2,7 +2,7 @@ package com.payflow.application.service;
 
 import com.payflow.domain.model.token.InvalidRefreshTokenException;
 import com.payflow.domain.model.token.RefreshToken;
-import com.payflow.infrastructure.persistence.jpa.RefreshTokenRepository;
+import com.payflow.domain.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
