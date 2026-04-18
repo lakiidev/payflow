@@ -1,7 +1,7 @@
 package com.payflow.application.service;
 
 import com.payflow.domain.model.transaction.Transaction;
-import com.payflow.infrastructure.persistence.jpa.TransactionRepository;
+import com.payflow.domain.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;

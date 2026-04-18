@@ -3,7 +3,7 @@ package com.payflow.application.service;
 
 import com.payflow.domain.model.token.InvalidRefreshTokenException;
 import com.payflow.domain.model.token.RefreshToken;
-import com.payflow.infrastructure.persistence.jpa.RefreshTokenRepository;
+import com.payflow.domain.repository.RefreshTokenRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -71,7 +71,7 @@ class RefreshTokenServiceTest {
     }
 
 
-        @Test
+    @Test
     void shouldThrowWhenTokenExpired() {
         // Given
         RefreshToken expired = RefreshToken.builder()

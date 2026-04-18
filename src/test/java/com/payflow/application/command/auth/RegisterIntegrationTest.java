@@ -2,8 +2,8 @@ package com.payflow.application.command.auth;
 
 import com.payflow.TestcontainersConfiguration;
 import com.payflow.api.dto.request.RegisterRequest;
-import com.payflow.infrastructure.persistence.jpa.UserRepository;
-import com.payflow.infrastructure.persistence.jpa.WalletRepository;
+import com.payflow.domain.repository.UserRepository;
+import com.payflow.domain.repository.WalletRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

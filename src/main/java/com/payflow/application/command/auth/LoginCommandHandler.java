@@ -5,7 +5,7 @@ import com.payflow.api.dto.response.AuthenticationResponse;
 import com.payflow.application.port.TokenPort;
 import com.payflow.application.service.RefreshTokenService;
 import com.payflow.domain.model.user.User;
-import com.payflow.infrastructure.persistence.jpa.UserRepository;
+import com.payflow.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

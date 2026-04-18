@@ -1,7 +1,6 @@
 package com.payflow.infrastructure.kafka;
 
 import com.payflow.domain.model.outbox.OutboxEvent;
-import com.payflow.infrastructure.persistence.jpa.OutboxRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;

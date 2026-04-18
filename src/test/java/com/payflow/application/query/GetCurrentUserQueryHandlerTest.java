@@ -2,7 +2,7 @@ package com.payflow.application.query;
 
 import com.payflow.api.dto.response.UserProfileResponse;
 import com.payflow.domain.model.user.User;
-import com.payflow.infrastructure.persistence.jpa.UserRepository;
+import com.payflow.domain.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

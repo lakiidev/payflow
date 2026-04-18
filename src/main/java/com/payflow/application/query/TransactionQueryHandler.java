@@ -2,7 +2,7 @@ package com.payflow.application.query;
 
 import com.payflow.api.dto.response.TransactionResponse;
 import com.payflow.domain.model.transaction.TransactionNotFoundException;
-import com.payflow.infrastructure.persistence.jpa.TransactionRepository;
+import com.payflow.domain.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

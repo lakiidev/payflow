@@ -1,7 +1,7 @@
 package com.payflow.application.query;
 
 import com.payflow.api.dto.response.UserProfileResponse;
-import com.payflow.infrastructure.persistence.jpa.UserRepository;
+import com.payflow.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;

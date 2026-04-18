@@ -8,7 +8,7 @@ import com.payflow.domain.model.outbox.OutboxEvent;
 import com.payflow.domain.model.outbox.OutboxEventStatus;
 import com.payflow.domain.model.transaction.Transaction;
 import com.payflow.domain.model.transaction.TransactionType;
-import com.payflow.infrastructure.persistence.jpa.OutboxRepository;
+import com.payflow.domain.repository.OutboxRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

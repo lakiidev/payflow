@@ -3,7 +3,7 @@ package com.payflow.application.query.wallet;
 import com.payflow.api.dto.response.BalanceResponse;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.domain.model.wallet.WalletNotFoundException;
-import com.payflow.infrastructure.persistence.jpa.WalletRepository;
+import com.payflow.domain.repository.WalletRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

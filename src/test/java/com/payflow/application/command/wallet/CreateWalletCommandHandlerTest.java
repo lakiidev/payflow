@@ -3,7 +3,7 @@ package com.payflow.application.command.wallet;
 import com.payflow.api.dto.response.WalletResponse;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.domain.model.wallet.WalletAlreadyExistsException;
-import com.payflow.infrastructure.persistence.jpa.WalletRepository;
+import com.payflow.domain.repository.WalletRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

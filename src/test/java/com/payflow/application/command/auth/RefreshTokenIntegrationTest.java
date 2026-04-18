@@ -5,8 +5,8 @@ import com.payflow.api.dto.request.RefreshRequest;
 import com.payflow.api.dto.request.RegisterRequest;
 import com.payflow.api.dto.response.AuthenticationResponse;
 import com.payflow.domain.model.token.RefreshToken;
-import com.payflow.infrastructure.persistence.jpa.RefreshTokenRepository;
-import com.payflow.infrastructure.persistence.jpa.UserRepository;
+import com.payflow.domain.repository.RefreshTokenRepository;
+import com.payflow.infrastructure.persistence.jpa.UserJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RefreshTokenIntegrationTest {
     @Autowired private RestTestClient restTestClient;
     @Autowired private RefreshTokenRepository refreshTokenRepository;
-    @Autowired private UserRepository userRepository;
+    @Autowired private UserJpaRepository userRepository;
 
     private String rawRefreshToken;
     private String userEmail;
@@ -98,7 +98,7 @@ class RefreshTokenIntegrationTest {
 
     @Test
     void shouldReturn401OnExpiredToken() {
-        // Insert expired token directly via repository
+        // Insert an expired token directly via repository
         String expiredRaw = UUID.randomUUID().toString();
         refreshTokenRepository.save(RefreshToken.builder()
                 .userId(userRepository.findByEmail(userEmail).orElseThrow().getId())
