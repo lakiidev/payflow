@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface ProcessedEventRepository extends JpaRepository<ProcessedEvent, UUID> {
     boolean existsById(UUID id);
+    boolean existsByEventIdAndConsumerGroup(UUID eventId, String consumerGroup);
 }

@@ -21,6 +21,9 @@ public class ProcessedEvent {
     @Column(name = "event_id", updatable = false)
     private UUID eventId;
 
+    @Column(name = "consumer_group", nullable = false)
+    private String consumerGroup;
+
     @Column(nullable = false, updatable = false)
     private Instant processedAt;
 }
