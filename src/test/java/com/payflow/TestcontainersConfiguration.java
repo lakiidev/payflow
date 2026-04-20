@@ -22,7 +22,7 @@ public class TestcontainersConfiguration {
     @ServiceConnection
     @RestartScope
     KafkaContainer kafkaContainer() {
-        return new KafkaContainer("apache/kafka:3.8.1");
+        return new KafkaContainer(DockerImageName.parse("apache/kafka:3.8.1"));
     }
 
 }
