@@ -48,7 +48,6 @@ class AuditConsumerIntegrationTest  {
         UUID eventId = UUID.randomUUID();
         var future = kafkaTemplate.send(transactionsTopic, eventId.toString(), serialize(eventId));
         future.get(); // blocks until send completes
-        System.out.println("Sent to topic: " + transactionsTopic);
 
         await().atMost(30, SECONDS).untilAsserted(() -> {
             assertThat(auditLogRepository.findByEntityTypeAndEntityId("Transaction", eventId)).hasSize(1);
