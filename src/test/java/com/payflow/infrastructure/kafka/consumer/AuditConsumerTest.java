@@ -12,8 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.kafka.support.Acknowledgment;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.UUID;
@@ -29,7 +27,6 @@ class AuditConsumerTest {
     @Mock private TransactionTemplate transactionTemplate;
     @Mock private ProcessedEventRepository processedEventRepository;
     @Mock private AuditLogRepository auditLogRepository;
-    @Mock private Acknowledgment ack;
 
     private AuditConsumer consumer;
 
@@ -42,26 +39,23 @@ class AuditConsumerTest {
     @BeforeEach
     void setUp() {
         ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-        consumer = new AuditConsumer(transactionTemplate, processedEventRepository, auditLogRepository, objectMapper);
+        consumer = new AuditConsumer(processedEventRepository, auditLogRepository, objectMapper);
 
         validPayload = """
                 {"transactionId":"%s","type":"DEPOSIT","fromWalletId":null,"toWalletId":"%s",\
                 "amountCents":5000,"currency":"EUR","completedAt":"2024-01-01T00:00:00Z"}"""
                 .formatted(EVENT_ID, WALLET_ID);
 
-        doAnswer(invocation -> {
-            TransactionCallback<?> callback = invocation.getArgument(0);
-            return callback.doInTransaction(null);
-        }).when(transactionTemplate).execute(any());
+
     }
 
     @Test
     void shouldSaveAuditLogAndMarkEventProcessedWhenEventIsNew() {
         // Given
-        when(processedEventRepository.existsByEventIdAndConsumerGroup(EVENT_ID, AUDIT_GROUP)).thenReturn(false);
+        when(processedEventRepository.existsByIdEventIdAndIdConsumerGroup(EVENT_ID, AUDIT_GROUP)).thenReturn(false);
 
         // When
-        consumer.handle(validPayload, ack);
+        consumer.handle(validPayload);
 
         // Then
         ArgumentCaptor<AuditLog> auditCaptor = ArgumentCaptor.forClass(AuditLog.class);
@@ -70,61 +64,55 @@ class AuditConsumerTest {
         assertThat(saved.getAction()).isEqualTo("DEPOSIT");
         assertThat(saved.getEntityType()).isEqualTo("Transaction");
         assertThat(saved.getEntityId()).isEqualTo(EVENT_ID);
-
         verify(processedEventRepository).save(any(ProcessedEvent.class));
-        verify(ack).acknowledge();
     }
 
     @Test
-    void shouldSkipAuditLogAndAckWhenSameEventAlreadyProcessedByAuditGroup() {
+    void shouldSkipAuditLogWhenSameEventAlreadyProcessedByAuditGroup() {
         // Given
-        when(processedEventRepository.existsByEventIdAndConsumerGroup(EVENT_ID, AUDIT_GROUP)).thenReturn(true);
+        when(processedEventRepository.existsByIdEventIdAndIdConsumerGroup(EVENT_ID, AUDIT_GROUP)).thenReturn(true);
 
         // When
-        consumer.handle(validPayload, ack);
+        consumer.handle(validPayload);
 
-        // Then — idempotency: no side effects, but acknowledge the known duplicate
+        // Then
         verify(auditLogRepository, never()).save(any());
         verify(processedEventRepository, never()).save(any());
-        verify(ack).acknowledge();
     }
 
     @Test
     void shouldProcessEventWhenSameEventIdAlreadyProcessedByDifferentConsumerGroup() {
-        // Given — "analytics" group processed this event; processed_events has (EVENT_ID, "analytics")
-        // but existsByEventIdAndConsumerGroup(EVENT_ID, "audit") still returns false, so audit proceeds
-        when(processedEventRepository.existsByEventIdAndConsumerGroup(EVENT_ID, AUDIT_GROUP)).thenReturn(false);
+        // Given — analytics group processed this event but audit group has not
+        when(processedEventRepository.existsByIdEventIdAndIdConsumerGroup(EVENT_ID, AUDIT_GROUP)).thenReturn(false);
 
         // When
-        consumer.handle(validPayload, ack);
+        consumer.handle(validPayload);
 
-        // Then — audit group is independent; it writes its own processed_events row and acks
+        // Then — audit group is independent, writes its own processed_events row
         verify(auditLogRepository).save(any(AuditLog.class));
         verify(processedEventRepository).save(any(ProcessedEvent.class));
-        verify(ack).acknowledge();
     }
 
     @Test
     void shouldThrowIllegalStateWhenPayloadIsInvalidJson() {
-        // When / Then
-        assertThatThrownBy(() -> consumer.handle("not-valid-json", ack))
-                .isInstanceOf(IllegalStateException.class);
+        // Given
+        String invalidPayload = "not-valid-json";
 
+        // When / Then
+        assertThatThrownBy(() -> consumer.handle(invalidPayload))
+                .isInstanceOf(IllegalStateException.class);
         verify(auditLogRepository, never()).save(any());
-        verify(ack, never()).acknowledge();
     }
 
     @Test
-    void shouldNotAcknowledgeWhenRepositorySaveThrows() {
+    void shouldNotSaveProcessedEventWhenRepositorySaveThrows() {
         // Given
-        when(processedEventRepository.existsByEventIdAndConsumerGroup(EVENT_ID, AUDIT_GROUP)).thenReturn(false);
+        when(processedEventRepository.existsByIdEventIdAndIdConsumerGroup(EVENT_ID, AUDIT_GROUP)).thenReturn(false);
         when(auditLogRepository.save(any())).thenThrow(new RuntimeException());
 
-        // When / Then — exception propagates out of the transaction callback
-        assertThatThrownBy(() -> consumer.handle(validPayload, ack))
+        // When / Then
+        assertThatThrownBy(() -> consumer.handle(validPayload))
                 .isInstanceOf(RuntimeException.class);
-
         verify(processedEventRepository, never()).save(any());
-        verify(ack, never()).acknowledge();
     }
 }

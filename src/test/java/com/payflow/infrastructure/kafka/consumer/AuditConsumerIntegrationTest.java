@@ -8,6 +8,7 @@ import com.payflow.domain.model.transaction.TransactionType;
 import com.payflow.infrastructure.kafka.TransactionOutboxWriter.TransactionCreatedPayload;
 import com.payflow.infrastructure.persistence.jpa.AuditLogRepository;
 import com.payflow.infrastructure.persistence.jpa.ProcessedEventRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,16 +24,10 @@ import java.util.UUID;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
-        "spring.kafka.bootstrap-servers=localhost:9092",
-        "payflow.kafka.topics.transactions=transactions-test",
-        "payflow.kafka.consumer.audit-group=audit-test",
-        "app.jwt.secret=dGVzdC1zZWNyZXQta2V5LXRoYXQtaXMtbG9uZy1lbm91Z2gtZm9yLWhzNTEy"
-, // placeholder
-})
+@Slf4j
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
-class AuditConsumerIntegrationTest  {
+class AuditConsumerIntegrationTest {
 
     @Autowired private KafkaTemplate<String, String> kafkaTemplate;
     @Autowired private AuditLogRepository auditLogRepository;
@@ -43,30 +38,22 @@ class AuditConsumerIntegrationTest  {
 
     private static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
     private static final Currency EUR = Currency.getInstance("EUR");
-    @Test
-    void shouldWriteAuditLog() throws Exception {
-        UUID eventId = UUID.randomUUID();
-        var future = kafkaTemplate.send(transactionsTopic, eventId.toString(), serialize(eventId));
-        future.get(); // blocks until send completes
 
-        await().atMost(30, SECONDS).untilAsserted(() -> {
-            assertThat(auditLogRepository.findByEntityTypeAndEntityId("Transaction", eventId)).hasSize(1);
-        });
-    }
+
     @Test
     void shouldWriteAuditLogAndMarkEventProcessedWhenTransactionEventReceived() throws Exception {
         UUID eventId = UUID.randomUUID();
 
-        kafkaTemplate.send(transactionsTopic, eventId.toString(), serialize(eventId));
+        kafkaTemplate.send(transactionsTopic, eventId.toString(), serialize(eventId)).get();
 
         await().atMost(15, SECONDS).untilAsserted(() -> {
             List<AuditLog> logs = auditLogRepository.findByEntityTypeAndEntityId("Transaction", eventId);
             assertThat(logs).hasSize(1);
-            assertThat(logs.get(0).getAction()).isEqualTo("DEPOSIT");
-            assertThat(logs.get(0).getEntityId()).isEqualTo(eventId);
+            assertThat(logs.getFirst().getAction()).isEqualTo("DEPOSIT");
+            assertThat(logs.getFirst().getEntityId()).isEqualTo(eventId);
         });
 
-        assertThat(processedEventRepository.existsByEventIdAndConsumerGroup(eventId, "audit")).isTrue();
+        assertThat(processedEventRepository.existsByIdEventIdAndIdConsumerGroup(eventId, "audit")).isTrue();
     }
 
     @Test
@@ -74,17 +61,18 @@ class AuditConsumerIntegrationTest  {
         UUID eventId = UUID.randomUUID();
         String payload = serialize(eventId);
 
-        kafkaTemplate.send(transactionsTopic, eventId.toString(), payload);
+        kafkaTemplate.send(transactionsTopic, eventId.toString(), payload).get();
 
         await().atMost(15, SECONDS).untilAsserted(() ->
-            assertThat(auditLogRepository.findByEntityTypeAndEntityId("Transaction", eventId)).hasSize(1)
-        );
+                assertThat(auditLogRepository.findByEntityTypeAndEntityId("Transaction", eventId)).hasSize(1));
 
-        kafkaTemplate.send(transactionsTopic, eventId.toString(), payload);
+        kafkaTemplate.send(transactionsTopic, eventId.toString(), payload).get();
 
-
-        assertThat(auditLogRepository.findByEntityTypeAndEntityId("Transaction", eventId)).hasSize(1);
-        assertThat(processedEventRepository.existsByEventIdAndConsumerGroup(eventId, "audit")).isTrue();
+        // wait long enough for a reprocessing attempt, assert still only 1
+        await().atMost(15, SECONDS).untilAsserted(() -> {
+            assertThat(auditLogRepository.findByEntityTypeAndEntityId("Transaction", eventId)).hasSize(1);
+            assertThat(processedEventRepository.existsByIdEventIdAndIdConsumerGroup(eventId, "audit")).isTrue();
+        });
     }
 
     private static String serialize(UUID eventId) throws Exception {
