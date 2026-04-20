@@ -83,10 +83,10 @@ class AuditConsumerTest {
         // When
         consumer.handle(validPayload, ack);
 
-        // Then — idempotency: no side effects, no ack
+        // Then — idempotency: no side effects, but acknowledge the known duplicate
         verify(auditLogRepository, never()).save(any());
         verify(processedEventRepository, never()).save(any());
-        verify(ack, never()).acknowledge();
+        verify(ack).acknowledge();
     }
 
     @Test
