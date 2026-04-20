@@ -1,7 +1,7 @@
 services:
-  postgres:
+  postgres-primary:
     image: postgres:18-alpine
-    container_name: payflow-postgres
+    container_name: payflow-postgres-primary
     environment:
       POSTGRES_DB: payflow
       POSTGRES_USER: ${DB_USER}
@@ -9,7 +9,24 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_primary_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d payflow" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-replica:
+    image: postgres:18-alpine
+    container_name: payflow-postgres-replica
+    environment:
+      POSTGRES_DB: payflow
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_replica_data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d payflow" ]
       interval: 10s
@@ -45,5 +62,6 @@ services:
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
 
 volumes:
-  postgres_data:
+  postgres_primary_data:
+  postgres_replica_data:
   redis_data:

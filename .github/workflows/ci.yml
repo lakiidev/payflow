@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      postgres:
+      postgres-primary:
         image: postgres:18-alpine
         env:
           POSTGRES_DB: payflow
@@ -18,6 +18,20 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         ports:
           - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U dev -d payflow"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      postgres-replica:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: payflow
+          POSTGRES_USER: dev
+          POSTGRES_PASSWORD: dev
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        ports:
+          - 5433:5432
         options: >-
           --health-cmd "pg_isready -U dev -d payflow"
           --health-interval 10s
@@ -37,8 +51,9 @@ jobs:
       - name: Build and test
         run: mvn verify
         env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/payflow
-          SPRING_DATASOURCE_USERNAME: dev
-          SPRING_DATASOURCE_PASSWORD: dev
+          DB_WRITE_URL: jdbc:postgresql://localhost:5432/payflow
+          DB_READ_URL: jdbc:postgresql://localhost:5433/payflow
+          DB_USERNAME: dev
+          DB_PASSWORD: dev
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           SPRING_KAFKA_BOOTSTRAP_SERVERS: localhost:9092
