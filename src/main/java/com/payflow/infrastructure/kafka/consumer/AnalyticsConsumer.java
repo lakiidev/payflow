@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class AnalyticsConsumer {
+    private static final String CONSUMER_GROUP = "analytics";
 
     @KafkaListener(
             topics = "${payflow.kafka.topics.transactions}",
