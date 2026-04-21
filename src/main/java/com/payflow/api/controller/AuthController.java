@@ -66,10 +66,18 @@ public class AuthController {
             @RequestHeader("Authorization") String authHeader,
             @RequestBody LogoutRequest request
     ) {
-        String accessToken = authHeader.substring(7);
-        String jti = jwtService.extractJti(accessToken);
-        long ttlSeconds = (jwtService.extractExpiration(accessToken).getTime() - System.currentTimeMillis()) / 1000;
+        String accessToken = jwtService.extractBearerToken(authHeader);
+        if (accessToken == null) {
+            return ResponseEntity.status(401).build();
+        }
 
+        String jti = jwtService.extractJti(accessToken);
+        java.util.Date expiration = jwtService.extractExpiration(accessToken);
+        if (jti == null || expiration == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        long ttlSeconds = (expiration.getTime() - System.currentTimeMillis()) / 1000;
         logoutCommandHandler.handle(new LogoutCommandHandler.Command(
                 jti,
                 Math.max(ttlSeconds, 0),
