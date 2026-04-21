@@ -1,25 +1,19 @@
 package com.payflow.application.command.auth;
 
-import com.payflow.TestcontainersConfiguration;
+import com.payflow.BaseIntegrationTest;
 import com.payflow.api.dto.request.RegisterRequest;
-import com.payflow.domain.repository.UserRepository;
-import com.payflow.domain.repository.WalletRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(TestcontainersConfiguration.class)
 @AutoConfigureRestTestClient
-class RegisterIntegrationTest {
+class RegisterIntegrationTest extends BaseIntegrationTest {
 
     @Autowired private RestTestClient restTestClient;
-    @Autowired private UserRepository userRepository;
-    @Autowired private WalletRepository walletRepository;
 
     @Test
     void shouldRegisterUserCreateWalletAndReturnTokens() {

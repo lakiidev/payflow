@@ -1,6 +1,7 @@
 package com.payflow.application.command.auth;
 
 
+import com.payflow.BaseIntegrationTest;
 import com.payflow.TestcontainersConfiguration;
 import com.payflow.api.dto.request.LoginRequest;
 import com.payflow.api.dto.request.RegisterRequest;
@@ -19,7 +20,7 @@ import java.util.UUID;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
 @AutoConfigureRestTestClient
-class LoginIntegrationTest {
+class LoginIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private RestTestClient restTestClient;

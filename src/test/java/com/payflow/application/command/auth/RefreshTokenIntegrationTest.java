@@ -1,5 +1,6 @@
 package com.payflow.application.command.auth;
 
+import com.payflow.BaseIntegrationTest;
 import com.payflow.TestcontainersConfiguration;
 import com.payflow.api.dto.request.RefreshRequest;
 import com.payflow.api.dto.request.RegisterRequest;
@@ -29,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
 @AutoConfigureRestTestClient
-class RefreshTokenIntegrationTest {
+class RefreshTokenIntegrationTest extends BaseIntegrationTest {
     @Autowired private RestTestClient restTestClient;
     @Autowired private RefreshTokenRepository refreshTokenRepository;
     @Autowired private UserJpaRepository userRepository;

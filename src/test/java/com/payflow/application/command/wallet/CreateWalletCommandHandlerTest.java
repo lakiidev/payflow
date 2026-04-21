@@ -1,6 +1,7 @@
 package com.payflow.application.command.wallet;
 
 import com.payflow.api.dto.response.WalletResponse;
+import com.payflow.application.service.WalletService;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.domain.model.wallet.WalletAlreadyExistsException;
 import com.payflow.domain.repository.WalletRepository;
@@ -25,6 +26,10 @@ class CreateWalletCommandHandlerTest {
     @Mock
     private WalletRepository walletRepository;
 
+
+    @Mock
+    private WalletService walletService;
+
     @InjectMocks
     private CreateWalletCommandHandler handler;
 
@@ -39,7 +44,7 @@ class CreateWalletCommandHandlerTest {
 
         assertThat(response.currency()).isEqualTo(EUR);
         assertThat(response.balance()).isZero();
-        verify(walletRepository).save(any(Wallet.class));
+        verify(walletService).save(any(Wallet.class));
     }
 
     @Test
@@ -51,6 +56,6 @@ class CreateWalletCommandHandlerTest {
         assertThatThrownBy(() -> handler.handle(new CreateWalletCommandHandler.Command(userId, EUR)))
                 .isInstanceOf(WalletAlreadyExistsException.class);
 
-        verify(walletRepository, never()).save(any());
+        verify(walletService, never()).save(any());
     }
 }

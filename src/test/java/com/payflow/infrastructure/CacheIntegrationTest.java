@@ -1,5 +1,6 @@
 package com.payflow.infrastructure;
 
+import com.payflow.BaseIntegrationTest;
 import com.payflow.TestcontainersConfiguration;
 import com.payflow.application.service.WalletService;
 import com.payflow.domain.model.user.User;
@@ -22,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import(TestcontainersConfiguration.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 
-class CacheIntegrationTest {
+class CacheIntegrationTest  extends BaseIntegrationTest {
 
     @Autowired
     private WalletService walletService;

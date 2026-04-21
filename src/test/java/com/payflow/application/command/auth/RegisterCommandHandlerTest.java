@@ -3,6 +3,7 @@ package com.payflow.application.command.auth;
 import com.payflow.api.dto.response.AuthenticationResponse;
 import com.payflow.application.port.TokenPort;
 import com.payflow.application.service.RefreshTokenService;
+import com.payflow.application.service.WalletService;
 import com.payflow.domain.model.user.EmailAlreadyRegisteredException;
 import com.payflow.domain.model.user.User;
 import com.payflow.domain.model.wallet.Wallet;
@@ -32,6 +33,10 @@ class RegisterCommandHandlerTest {
 
     @Mock
     private WalletRepository walletRepository;
+
+
+    @Mock
+    private WalletService walletService;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -66,7 +71,7 @@ class RegisterCommandHandlerTest {
         assertThat(response.getRefreshToken()).isEqualTo("refresh-token");
         assertThat(response.getEmail()).isEqualTo("test@payflow.com");
         verify(userRepository).save(any(User.class));
-        verify(walletRepository).save(any(Wallet.class));
+        verify(walletService).save(any(Wallet.class));
         verify(passwordEncoder).encode("password123");
     }
 
