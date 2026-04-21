@@ -23,7 +23,7 @@ public class JwtService extends TokenService implements TokenPort {
             return false;
         }
     }
-    private Date extractExpiration(String token) {
+    public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
@@ -43,6 +43,9 @@ public class JwtService extends TokenService implements TokenPort {
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+    public String extractJti(String token) {
+        return extractClaim(token, Claims::getId);
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {

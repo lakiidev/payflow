@@ -1,5 +1,6 @@
 package com.payflow.application.command.wallet;
 
+import com.payflow.application.service.WalletService;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.domain.model.wallet.WalletNotFoundException;
 import com.payflow.domain.repository.WalletRepository;
@@ -21,6 +22,7 @@ public class FreezeWalletCommandHandler {
     public record Command(UUID walletId, UUID userId) {}
 
     private final WalletRepository walletRepository;
+    private final WalletService walletService;
 
     @Retryable(
             retryFor = {ObjectOptimisticLockingFailureException.class, PessimisticLockingFailureException.class},
@@ -37,6 +39,6 @@ public class FreezeWalletCommandHandler {
                 .orElseThrow(() -> new WalletNotFoundException(command.walletId()));
 
         wallet.freeze();
-        walletRepository.save(wallet);
+        walletService.save(wallet);
     }
 }

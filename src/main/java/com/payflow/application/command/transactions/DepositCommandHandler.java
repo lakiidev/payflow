@@ -84,7 +84,7 @@ public class DepositCommandHandler {
 
         // STEP 6: Update cached balance after the ledger is written
         wallet.credit(command.amountCents());
-        walletRepository.save(wallet);
+        walletService.save(wallet);
 
         // STEP 7: Mark complete and persist
         tx.complete();

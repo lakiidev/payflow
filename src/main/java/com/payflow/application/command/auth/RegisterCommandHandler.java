@@ -5,13 +5,13 @@ package com.payflow.application.command.auth;
 import com.payflow.api.dto.response.AuthenticationResponse;
 import com.payflow.application.port.TokenPort;
 import com.payflow.application.service.RefreshTokenService;
+import com.payflow.application.service.WalletService;
 import com.payflow.domain.model.user.EmailAlreadyRegisteredException;
 import com.payflow.domain.model.user.User;
 import com.payflow.domain.model.user.UserStatus;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.domain.repository.RefreshTokenRepository;
 import com.payflow.domain.repository.UserRepository;
-import com.payflow.domain.repository.WalletRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class RegisterCommandHandler {
     public record Command(String email, String password, String fullName) {}
 
     private final UserRepository userRepository;
-    private final WalletRepository walletRepository;
+    private final WalletService walletService;
     private final PasswordEncoder passwordEncoder;
     private final TokenPort tokenPort;
 
@@ -47,7 +47,7 @@ public class RegisterCommandHandler {
         userRepository.save(user);
 
         Wallet wallet = Wallet.create(user.getId(), Currency.getInstance("GBP"));
-        walletRepository.save(wallet);
+        walletService.save(wallet);
         String accessToken = tokenPort.generateAccessToken(user);
         String rawRefreshToken = refreshTokenService.issue(user.getId());
         return AuthenticationResponse.builder()

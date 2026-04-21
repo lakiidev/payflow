@@ -10,6 +10,7 @@ import javax.crypto.SecretKey;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class TokenService {
@@ -30,6 +31,7 @@ public class TokenService {
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis()+jwtExpiration))
+                .id(UUID.randomUUID().toString())
                 .signWith(getSignInKey(), Jwts.SIG.HS256).compact();
     }
 

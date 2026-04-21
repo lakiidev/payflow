@@ -89,7 +89,7 @@ public class WithdrawCommandHandler {
 
         // STEP 6: Debit cached balance after the ledger is written
         wallet.debit(command.amountCents());
-        walletRepository.save(wallet);
+        walletService.save(wallet);
 
         // STEP 7: Mark complete and persist
         tx.complete();

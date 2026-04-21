@@ -1,5 +1,6 @@
 package com.payflow;
 
+import com.redis.testcontainers.RedisContainer;
 import org.springframework.boot.devtools.restart.RestartScope;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -36,5 +37,11 @@ public class TestcontainersConfiguration {
     @RestartScope
     KafkaContainer kafkaContainer() {
         return new KafkaContainer(DockerImageName.parse("apache/kafka:3.8.1"));
+    }
+    @Bean
+    @ServiceConnection
+    @RestartScope
+    RedisContainer redisContainer() {
+        return new RedisContainer(DockerImageName.parse("redis:8.6-alpine"));
     }
 }
