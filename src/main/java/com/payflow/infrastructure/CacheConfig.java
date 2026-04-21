@@ -32,6 +32,7 @@ public class CacheConfig implements CachingConfigurer {
 
         return RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(config)
+                .transactionAware()
                 .build();
     }
 

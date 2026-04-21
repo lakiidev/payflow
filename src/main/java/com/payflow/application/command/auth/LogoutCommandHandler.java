@@ -23,11 +23,14 @@ public class LogoutCommandHandler {
     // Week 3: redisTemplate.opsForValue().set("denylist:" + command.tokenJti(), ...)
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void handle(Command command) {
-        redisTemplate.opsForValue().set(
-                "denylist:" + command.tokenJti(),
-                "1",
-                Duration.ofSeconds(command.remainingTtlSeconds())
-        );
+        long remainingTtlSeconds = command.remainingTtlSeconds();
+        if (remainingTtlSeconds > 0) {
+            redisTemplate.opsForValue().set(
+                    "denylist:" + command.tokenJti(),
+                    "1",
+                    Duration.ofSeconds(remainingTtlSeconds)
+            );
+        }
         refreshTokenService.revoke(
                 command.rawRefreshToken()
         );
