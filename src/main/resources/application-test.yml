@@ -1,4 +1,4 @@
-yamlspring:
+spring:
   datasource:
     write:
       url:
