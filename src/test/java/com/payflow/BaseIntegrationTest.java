@@ -19,7 +19,7 @@ public abstract class BaseIntegrationTest {
     static final PostgreSQLContainer postgres;
 
     static {
-        postgres = new PostgreSQLContainer(DockerImageName.parse("timescale/timescaledb:2.17.2-pg18")
+        postgres = new PostgreSQLContainer(DockerImageName.parse("timescale/timescaledb:latest-pg18")
                 .asCompatibleSubstituteFor("postgres")
         ).withDatabaseName("payflow");
         postgres.start();
