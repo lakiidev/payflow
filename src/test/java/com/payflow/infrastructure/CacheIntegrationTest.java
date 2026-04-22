@@ -4,6 +4,8 @@ import com.payflow.BaseIntegrationTest;
 import com.payflow.application.service.WalletService;
 import com.payflow.domain.model.user.User;
 import com.payflow.domain.model.wallet.Wallet;
+import com.payflow.infrastructure.persistence.jpa.LedgerEntryJpaRepository;
+import com.payflow.infrastructure.persistence.jpa.TransactionJpaRepository;
 import com.payflow.infrastructure.persistence.jpa.UserJpaRepository;
 import com.payflow.infrastructure.persistence.jpa.WalletJpaRepository;
 import org.junit.jupiter.api.*;
@@ -39,7 +41,10 @@ class CacheIntegrationTest  extends BaseIntegrationTest {
     private UserJpaRepository userRepository;
 
     @Autowired
-    private com.payflow.infrastructure.persistence.jpa.TransactionJpaRepository transactionRepository;
+    private TransactionJpaRepository transactionRepository;
+
+    @Autowired
+    private LedgerEntryJpaRepository ledgerEntryRepository;
 
     @BeforeEach
     void setUp() {
@@ -57,6 +62,7 @@ class CacheIntegrationTest  extends BaseIntegrationTest {
 
     @AfterEach
     void tearDown() {
+        ledgerEntryRepository.deleteAll();
         transactionRepository.deleteAll();
         walletRepository.deleteAll();
         userRepository.deleteAll();
