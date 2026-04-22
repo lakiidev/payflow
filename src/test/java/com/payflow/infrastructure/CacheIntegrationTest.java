@@ -38,6 +38,9 @@ class CacheIntegrationTest  extends BaseIntegrationTest {
     @Autowired
     private UserJpaRepository userRepository;
 
+    @Autowired
+    private com.payflow.infrastructure.persistence.jpa.TransactionJpaRepository transactionRepository;
+
     @BeforeEach
     void setUp() {
         User user = User.builder()
@@ -54,10 +57,11 @@ class CacheIntegrationTest  extends BaseIntegrationTest {
 
     @AfterEach
     void tearDown() {
+        transactionRepository.deleteAll();
         walletRepository.deleteAll();
         userRepository.deleteAll();
         cacheManager.getCache("wallets").clear();
-}
+    }
 
 
     @Test
