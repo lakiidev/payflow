@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    write:
+      url:
+      username:
+      password:
+    read:
+      url:
+      username:
+      password:
+app:
+  jwt:
+    secret: test-secret-key-that-is-long-enough-for-hs512-algorithm-probably-have-to-be-longer
+    expiration: 3600000

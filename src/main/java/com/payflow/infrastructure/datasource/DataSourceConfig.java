@@ -17,14 +17,13 @@ public class DataSourceConfig {
     @ConfigurationProperties("spring.datasource.write")
     public DataSourceProperties writeDataSourceProperties() {
         DataSourceProperties props = new DataSourceProperties();
-        System.out.println("### WRITE URL: " + props.getUrl());
         return props;
     }
 
     @Bean
     @ConfigurationProperties("spring.datasource.write.hikari")
-    public HikariDataSource writeDataSource() {
-        HikariDataSource ds =  writeDataSourceProperties()
+    public HikariDataSource writeDataSource(DataSourceProperties writeDataSourceProperties) {
+        HikariDataSource ds = writeDataSourceProperties
                 .initializeDataSourceBuilder()
                 .type(HikariDataSource.class)
                 .build();
@@ -40,8 +39,8 @@ public class DataSourceConfig {
 
     @Bean
     @ConfigurationProperties("spring.datasource.read.hikari")
-    public HikariDataSource readDataSource() {
-        HikariDataSource ds =  readDataSourceProperties()
+    public HikariDataSource readDataSource(DataSourceProperties readDataSourceProperties) {
+        HikariDataSource ds = readDataSourceProperties
                 .initializeDataSourceBuilder()
                 .type(HikariDataSource.class)
                 .build();
@@ -51,12 +50,10 @@ public class DataSourceConfig {
 
     @Bean
     @Primary
-    public DataSource dataSource() {
-        HikariDataSource write = writeDataSource();
-        HikariDataSource read = readDataSource();
+    public DataSource dataSource(HikariDataSource writeDataSource, HikariDataSource readDataSource) {
         var routing = new RoutingDataSource();
-        routing.setTargetDataSources(Map.of("write", write, "read", read));
-        routing.setDefaultTargetDataSource(write);
+        routing.setTargetDataSources(Map.of("write", writeDataSource, "read", readDataSource));
+        routing.setDefaultTargetDataSource(writeDataSource);
         return routing;
     }
 }
