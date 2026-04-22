@@ -13,19 +13,19 @@ import java.util.UUID;
 public interface WalletReconciliationRepository extends JpaRepository<Wallet, UUID> {
 
     @Query("""
-        SELECT new  com.payflow.infrastructure.reconciliation.WalletDiscrepancy(
+        SELECT new com.payflow.infrastructure.reconciliation.WalletDiscrepancy(
             w.id,
             w.currentBalance,
-            COALESCE(SUM(CASE WHEN l.entryType = com.payflow.domain.model.wallet.EntryType.CREDIT THEN l.amount ELSE 0 END), 0) -
-            COALESCE(SUM(CASE WHEN l.entryType = com.payflow.domain.model.wallet.EntryType.DEBIT THEN l.amount ELSE 0 END), 0)
+            COALESCE((
+                SELECT SUM(CASE WHEN l.entryType = com.payflow.domain.model.ledger.EntryType.CREDIT THEN l.amount ELSE -l.amount END)
+                FROM LedgerEntry l WHERE l.walletId = w.id
+            ), 0)
         )
         FROM Wallet w
-        LEFT JOIN LedgerEntry l ON l.walletId = w.id
-        GROUP BY w.id, w.currentBalance
-        HAVING w.currentBalance <> (
-            COALESCE(SUM(CASE WHEN l.entryType = com.payflow.domain.model.wallet.EntryType.CREDIT THEN l.amount ELSE 0 END), 0) -
-            COALESCE(SUM(CASE WHEN l.entryType = com.payflow.domain.model.wallet.EntryType.DEBIT THEN l.amount ELSE 0 END), 0)
-        )
+        WHERE w.currentBalance != COALESCE((
+            SELECT SUM(CASE WHEN l.entryType = com.payflow.domain.model.ledger.EntryType.CREDIT THEN l.amount ELSE -l.amount END)
+            FROM LedgerEntry l WHERE l.walletId = w.id
+        ), 0)
         """)
     List<WalletDiscrepancy> findCacheDiscrepancies();
 }
