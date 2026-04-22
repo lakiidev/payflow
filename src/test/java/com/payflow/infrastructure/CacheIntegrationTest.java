@@ -41,7 +41,7 @@ class CacheIntegrationTest  extends BaseIntegrationTest {
     @BeforeEach
     void setUp() {
         User user = User.builder()
-                .email("test@payflow.com")
+                .email("test-" + UUID.randomUUID() + "@payflow.com")
                 .fullName("Test User")
                 .passwordHash("test123").build();
         user = userRepository.save(user);
