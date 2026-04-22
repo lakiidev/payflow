@@ -16,15 +16,15 @@ public interface WalletReconciliationRepository extends JpaRepository<Wallet, UU
         SELECT new  com.payflow.infrastructure.reconciliation.WalletDiscrepancy(
             w.id,
             w.currentBalance,
-            COALESCE(SUM(l.amount) FILTER (WHERE l.entryType = 'CREDIT'), 0) -
-            COALESCE(SUM(l.amount) FILTER (WHERE l.entryType = 'DEBIT'),   0)
+            COALESCE(SUM(CASE WHEN l.entryType = com.payflow.domain.model.wallet.EntryType.CREDIT THEN l.amount ELSE 0 END), 0) -
+            COALESCE(SUM(CASE WHEN l.entryType = com.payflow.domain.model.wallet.EntryType.DEBIT THEN l.amount ELSE 0 END), 0)
         )
         FROM Wallet w
         LEFT JOIN LedgerEntry l ON l.walletId = w.id
         GROUP BY w.id, w.currentBalance
         HAVING w.currentBalance <> (
-            COALESCE(SUM(l.amount) FILTER (WHERE l.entryType = 'CREDIT'), 0) -
-            COALESCE(SUM(l.amount) FILTER (WHERE l.entryType = 'DEBIT'),   0)
+            COALESCE(SUM(CASE WHEN l.entryType = com.payflow.domain.model.wallet.EntryType.CREDIT THEN l.amount ELSE 0 END), 0) -
+            COALESCE(SUM(CASE WHEN l.entryType = com.payflow.domain.model.wallet.EntryType.DEBIT THEN l.amount ELSE 0 END), 0)
         )
         """)
     List<WalletDiscrepancy> findCacheDiscrepancies();
