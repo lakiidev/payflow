@@ -62,8 +62,27 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestBody LogoutRequest request) {
-        logoutCommandHandler.handle(new LogoutCommandHandler.Command(request.refreshToken()));
+    public ResponseEntity<Void> logout(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody LogoutRequest request
+    ) {
+        String accessToken = jwtService.extractBearerToken(authHeader);
+        if (accessToken == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        String jti = jwtService.extractJti(accessToken);
+        java.util.Date expiration = jwtService.extractExpiration(accessToken);
+        if (jti == null || expiration == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        long ttlSeconds = (expiration.getTime() - System.currentTimeMillis()) / 1000;
+        logoutCommandHandler.handle(new LogoutCommandHandler.Command(
+                jti,
+                Math.max(ttlSeconds, 0),
+                request.refreshToken()
+        ));
         return ResponseEntity.noContent().build();
     }
 }

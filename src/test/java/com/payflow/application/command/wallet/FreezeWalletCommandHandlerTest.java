@@ -1,5 +1,6 @@
 package com.payflow.application.command.wallet;
 
+import com.payflow.application.service.WalletService;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.domain.model.wallet.WalletNotFoundException;
 import com.payflow.domain.model.wallet.WalletStatus;
@@ -25,6 +26,10 @@ class FreezeWalletCommandHandlerTest {
     @Mock
     private WalletRepository walletRepository;
 
+
+    @Mock
+    private WalletService walletService;
+
     @InjectMocks
     private FreezeWalletCommandHandler handler;
 
@@ -37,7 +42,7 @@ class FreezeWalletCommandHandlerTest {
         handler.handle(new FreezeWalletCommandHandler.Command(wallet.getId(), userId));
 
         assertThat(wallet.getStatus()).isEqualTo(WalletStatus.FROZEN);
-        verify(walletRepository).save(wallet);
+        verify(walletService).save(wallet);
     }
 
     @Test
@@ -48,7 +53,7 @@ class FreezeWalletCommandHandlerTest {
         assertThatThrownBy(() -> handler.handle(new FreezeWalletCommandHandler.Command(walletId, UUID.randomUUID())))
                 .isInstanceOf(WalletNotFoundException.class);
 
-        verify(walletRepository, never()).save(any());
+        verify(walletService, never()).save(any());
     }
 
     @Test
@@ -61,7 +66,7 @@ class FreezeWalletCommandHandlerTest {
         assertThatThrownBy(() -> handler.handle(new FreezeWalletCommandHandler.Command(wallet.getId(), otherUserId)))
                 .isInstanceOf(WalletNotFoundException.class);
 
-        verify(walletRepository, never()).save(any());
+        verify(walletService, never()).save(any());
     }
 
     @Test

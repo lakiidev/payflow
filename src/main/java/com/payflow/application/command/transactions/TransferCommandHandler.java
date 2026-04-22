@@ -97,12 +97,12 @@ public class TransferCommandHandler {
         // STEP 6: Debit source — ledger first, then mutate cached balance
         ledgerService.createDebitEntry(tx, sourceWallet, command.amountCents());
         sourceWallet.debit(command.amountCents());
-        walletRepository.save(sourceWallet);
+        walletService.save(sourceWallet);
 
         // STEP 7: Credit destination
         ledgerService.createCreditEntry(tx, destinationWallet, command.amountCents());
         destinationWallet.credit(command.amountCents());
-        walletRepository.save(destinationWallet);
+        walletService.save(destinationWallet);
 
         // STEP 8: Mark complete and persist
         tx.complete();

@@ -1,6 +1,7 @@
 package com.payflow.application.command.wallet;
 
 import com.payflow.api.dto.response.WalletResponse;
+import com.payflow.application.service.WalletService;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.domain.model.wallet.WalletAlreadyExistsException;
 import com.payflow.domain.repository.WalletRepository;
@@ -19,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class CreateWalletCommandHandler {
+
+    private final WalletService walletService;
 
     public record Command(UUID userId, Currency currency) {}
 
@@ -39,7 +42,7 @@ public class CreateWalletCommandHandler {
             throw new WalletAlreadyExistsException(command.userId(), command.currency());
         }
         Wallet wallet = Wallet.create(command.userId(), command.currency());
-        walletRepository.save(wallet);
+        walletService.save(wallet);
         return WalletResponse.from(wallet);
     }
 }
