@@ -11,7 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 )
 @Import(TestcontainersConfiguration.class)
 @ActiveProfiles("test")
-class PayflowApplicationTests {
+class PayflowApplicationTests extends BaseIntegrationTest{
 
     @Test
     void contextLoads() {
