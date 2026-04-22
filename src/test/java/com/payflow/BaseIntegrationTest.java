@@ -1,21 +1,26 @@
 package com.payflow;
 
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
-@SpringBootTest
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
-@Testcontainers
+@AutoConfigureRestTestClient
 public abstract class BaseIntegrationTest {
 
-    @Container
-    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:18-alpine")
-            .withDatabaseName("payflow").withReuse(true);
+    static final PostgreSQLContainer postgres;
+
+    static {
+        postgres = new PostgreSQLContainer("postgres:18-alpine")
+                .withDatabaseName("payflow");
+        postgres.start();
+    }
+
 
     @DynamicPropertySource
     static void datasourceProperties(DynamicPropertyRegistry registry) {

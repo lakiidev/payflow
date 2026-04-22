@@ -1,7 +1,6 @@
 package com.payflow.application.command.auth;
 
 import com.payflow.BaseIntegrationTest;
-import com.payflow.TestcontainersConfiguration;
 import com.payflow.api.dto.request.RefreshRequest;
 import com.payflow.api.dto.request.RegisterRequest;
 import com.payflow.api.dto.response.AuthenticationResponse;
@@ -11,9 +10,6 @@ import com.payflow.infrastructure.persistence.jpa.UserJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 import java.nio.charset.StandardCharsets;
@@ -27,9 +23,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(TestcontainersConfiguration.class)
-@AutoConfigureRestTestClient
 class RefreshTokenIntegrationTest extends BaseIntegrationTest {
     @Autowired private RestTestClient restTestClient;
     @Autowired private RefreshTokenRepository refreshTokenRepository;

@@ -1,7 +1,6 @@
 package com.payflow.infrastructure;
 
 import com.payflow.BaseIntegrationTest;
-import com.payflow.TestcontainersConfiguration;
 import com.payflow.application.service.WalletService;
 import com.payflow.domain.model.user.User;
 import com.payflow.domain.model.wallet.Wallet;
@@ -9,18 +8,14 @@ import com.payflow.infrastructure.persistence.jpa.UserJpaRepository;
 import com.payflow.infrastructure.persistence.jpa.WalletJpaRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.context.annotation.Import;
 
 import java.util.Currency;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@Import(TestcontainersConfiguration.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 
 class CacheIntegrationTest  extends BaseIntegrationTest {

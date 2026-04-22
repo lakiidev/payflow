@@ -3,7 +3,6 @@ package com.payflow.infrastructure.kafka.consumer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.payflow.BaseIntegrationTest;
-import com.payflow.TestcontainersConfiguration;
 import com.payflow.domain.model.audit.AuditLog;
 import com.payflow.domain.model.transaction.TransactionType;
 import com.payflow.infrastructure.kafka.TransactionOutboxWriter.TransactionCreatedPayload;
@@ -13,8 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import java.time.Instant;
@@ -26,8 +23,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 @Slf4j
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(TestcontainersConfiguration.class)
 class AuditConsumerIntegrationTest extends BaseIntegrationTest {
 
     @Autowired private KafkaTemplate<String, String> kafkaTemplate;

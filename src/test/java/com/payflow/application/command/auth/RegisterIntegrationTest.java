@@ -4,13 +4,11 @@ import com.payflow.BaseIntegrationTest;
 import com.payflow.api.dto.request.RegisterRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+import java.util.UUID;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureRestTestClient
+
 class RegisterIntegrationTest extends BaseIntegrationTest {
 
     @Autowired private RestTestClient restTestClient;
@@ -20,7 +18,7 @@ class RegisterIntegrationTest extends BaseIntegrationTest {
         restTestClient.post()
                 .uri("/api/v1/auth/register")
                 .body(RegisterRequest.builder()
-                        .email("register-happy@payflow.com")
+                        .email("register-" + UUID.randomUUID() + "@payflow.com")
                         .password("password123")
                         .fullName("Test User")
                         .build())
@@ -30,23 +28,18 @@ class RegisterIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void shouldReturn409WhenEmailAlreadyRegistered() {
+        String email = "register-" + UUID.randomUUID() + "@payflow.com";
         RegisterRequest request = RegisterRequest.builder()
-                .email("register-duplicate@payflow.com")
+                .email(email)
                 .password("password123")
                 .fullName("Test User")
                 .build();
 
-        restTestClient.post()
-                .uri("/api/v1/auth/register")
-                .body(request)
-                .exchange()
-                .expectStatus().isOk();
+        restTestClient.post().uri("/api/v1/auth/register").body(request)
+                .exchange().expectStatus().isOk();
 
-        restTestClient.post()
-                .uri("/api/v1/auth/register")
-                .body(request)
-                .exchange()
-                .expectStatus().isEqualTo(409);
+        restTestClient.post().uri("/api/v1/auth/register").body(request)
+                .exchange().expectStatus().isEqualTo(409);
     }
 
     @Test
