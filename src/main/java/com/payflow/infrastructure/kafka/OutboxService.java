@@ -29,4 +29,20 @@ public class OutboxService {
         });
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void incrementRetry(UUID id, String error) {
+        outboxRepository.findById(id).ifPresent(event -> {
+            event.setRetryCount(event.getRetryCount() + 1);
+            event.setLastError(error);
+            outboxRepository.save(event);
+        });
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void markAsFailed(UUID id) {
+        outboxRepository.findById(id).ifPresent(event -> {
+            event.setStatus(OutboxEventStatus.FAILED);
+            outboxRepository.save(event);
+        });
+    }
 }

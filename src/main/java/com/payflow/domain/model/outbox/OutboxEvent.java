@@ -39,15 +39,18 @@ public class OutboxEvent {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OutboxEventStatus status;
+    @Setter
+    @Column(name = "retry_count", nullable = false)
+    private int retryCount;
+    @Setter
+    @Column(name = "last_error")
+    private String lastError;
 
     @CreationTimestamp
     private Instant createdAt;
 
     private Instant processedAt;
 
-    public void markProcessed() {
-        this.status = OutboxEventStatus.PROCESSED;
-        this.processedAt = Instant.now();
-    }
+
 
 }

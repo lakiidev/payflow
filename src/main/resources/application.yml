@@ -52,6 +52,7 @@ payflow:
   outbox:
     poll-interval-ms: 500
     batch-size: 100
+    max-retries: 5
   retry:
     max-attempts: 3
     initial-interval-ms: 100

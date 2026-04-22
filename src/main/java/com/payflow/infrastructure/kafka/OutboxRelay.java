@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+
+
+
 @Component
 @RequiredArgsConstructor
 public class OutboxRelay {
@@ -18,6 +21,9 @@ public class OutboxRelay {
     @Value("${payflow.outbox.batch-size}")
     private Integer batchSize;
 
+    @Value("${payflow.outbox.max-retries}")
+    private Integer maxRetries;
+
     @Scheduled(fixedDelayString = "${payflow.outbox.poll-interval-ms}")
     public void relay() {
         List<OutboxEvent> events = outboxService.fetchPending(batchSize);
@@ -26,13 +32,12 @@ public class OutboxRelay {
             try {
                 publisher.publish(event);
                 outboxService.markAsProcessed(event.getId());
-            } catch (Exception ignored) {
-                // leave as PENDING — retried on next poll
-                // TODO Week 3: add retry_count to outbox_events; mark FAILED after max retries
-                //  to prevent a poison-pill event retrying indefinitely
+            } catch (Exception e) {
+                outboxService.incrementRetry(event.getId(), e.getMessage());
+                if (event.getRetryCount() + 1 >= maxRetries) {
+                    outboxService.markAsFailed(event.getId());
+                }
             }
         }
     }
-
-
 }
