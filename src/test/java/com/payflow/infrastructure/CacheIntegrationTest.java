@@ -10,13 +10,13 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Currency;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 
 class CacheIntegrationTest  extends BaseIntegrationTest {
 
@@ -28,6 +28,9 @@ class CacheIntegrationTest  extends BaseIntegrationTest {
 
     @Autowired
     private CacheManager cacheManager;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     private UUID walletId;
     private UUID userId;
@@ -54,13 +57,16 @@ class CacheIntegrationTest  extends BaseIntegrationTest {
         walletRepository.deleteAll();
         userRepository.deleteAll();
         cacheManager.getCache("wallets").clear();
-    }
+}
 
 
     @Test
     void getActiveByIdFirstCallPopulatesCache() {
         // Given
-        walletService.getActiveById(walletId, userId);
+        transactionTemplate.execute(status -> {
+            walletService.getActiveById(walletId, userId);
+            return null;
+        });
 
         // When
         Cache cache = cacheManager.getCache("wallets");
@@ -72,6 +78,12 @@ class CacheIntegrationTest  extends BaseIntegrationTest {
     @Test
     void getActiveByIdSecondCallReturnsCachedValue() {
         // Given
+        transactionTemplate.execute(status -> {
+            walletService.getActiveById(walletId, userId);
+            return null;
+        });
+
+        // When
         Wallet first = walletService.getActiveById(walletId, userId);
         Wallet second = walletService.getActiveById(walletId, userId);
 
@@ -82,17 +94,21 @@ class CacheIntegrationTest  extends BaseIntegrationTest {
 
     @Test
     void saveEvictsCache() {
-        // Given
-        walletService.getActiveById(walletId, userId);
-        assertNotNull(cacheManager.getCache("wallets")
-                .get(walletId + ":" + userId));
+        // Given — populate cache in committed transaction
+        transactionTemplate.execute(status -> {
+            walletService.getActiveById(walletId, userId);
+            return null;
+        });
+        assertNotNull(cacheManager.getCache("wallets").get(walletId + ":" + userId));
 
-        // When
-        Wallet wallet = walletService.getActiveById(walletId, userId);
-        walletService.save(wallet);
+        // When — evict in committed transaction
+        transactionTemplate.execute(status -> {
+            Wallet wallet = walletService.getActiveById(walletId, userId);
+            walletService.save(wallet);
+            return null;
+        });
 
         // Then
-        assertNull(cacheManager.getCache("wallets")
-                .get(walletId + ":" + userId));
+        assertNull(cacheManager.getCache("wallets").get(walletId + ":" + userId));
     }
 }

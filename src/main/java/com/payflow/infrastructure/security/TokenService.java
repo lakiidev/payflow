@@ -37,7 +37,7 @@ public class TokenService {
 
 
     protected SecretKey getSignInKey() {
-        byte[] decodedKey = Base64.getDecoder().decode(jwtSecret);
+        byte[] decodedKey = Base64.getUrlDecoder().decode(jwtSecret);
         return Keys.hmacShaKeyFor(decodedKey);
     }
 }

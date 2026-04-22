@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
 
 public interface TransactionJpaRepository extends JpaRepository<Transaction,UUID >, TransactionRepository {
+    @Override
+    Transaction save(Transaction transaction);
 }
