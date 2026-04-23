@@ -46,7 +46,7 @@ transaction.
   no phantom events
 - `OutboxRelay` polls `outbox_events WHERE status = PENDING` on a fixed
   schedule and publishes to Kafka
-- On successful Kafka publish, the outbox entry is marked `PUBLISHED`
+- On successful Kafka publish, the outbox entry is marked `PROCESSED`
 - If Kafka is unavailable, the outbox entry remains `PENDING` and is retried
   on the next polling cycle — no event loss
 - The relay is the only component that writes to Kafka — clean separation
@@ -80,4 +80,6 @@ is preferable to immediate delivery with possible loss.
 - Event delivery is eventually consistent — consumers may lag behind the
   write path by up to one polling interval
 - `outbox_events` must be pruned periodically — entries older than 7 days
-  with status `PUBLISHED` can be deleted safely
+  with status `PROCESSED` can be deleted safely
+- Current relay assumes a single instance; horizontal scaling requires
+    SELECT ... FOR UPDATE SKIP LOCKED to prevent duplicate publishes

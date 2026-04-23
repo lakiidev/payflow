@@ -7,10 +7,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-
-
-
-
 @Component
 @RequiredArgsConstructor
 public class OutboxRelay {
@@ -21,8 +17,7 @@ public class OutboxRelay {
     @Value("${payflow.outbox.batch-size}")
     private Integer batchSize;
 
-    @Value("${payflow.outbox.max-retries}")
-    private Integer maxRetries;
+
 
     @Scheduled(fixedDelayString = "${payflow.outbox.poll-interval-ms}")
     public void relay() {
@@ -34,9 +29,6 @@ public class OutboxRelay {
                 outboxService.markAsProcessed(event.getId());
             } catch (Exception e) {
                 outboxService.incrementRetry(event.getId(), e.getMessage());
-                if (event.getRetryCount() + 1 >= maxRetries) {
-                    outboxService.markAsFailed(event.getId());
-                }
             }
         }
     }

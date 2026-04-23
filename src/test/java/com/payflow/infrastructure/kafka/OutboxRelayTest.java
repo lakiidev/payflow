@@ -22,11 +22,19 @@ class OutboxRelayTest {
 
     @InjectMocks private OutboxRelay relay;
 
+    private OutboxEvent pendingEvent(int retryCount) {
+        OutboxEvent event = new OutboxEvent();
+        ReflectionTestUtils.setField(event, "id", UUID.randomUUID());
+        event.setStatus(OutboxEventStatus.PENDING);
+        event.setRetryCount(retryCount);
+        return event;
+    }
+
+
     @Test
     void firstFailureStaysPending() {
         // Given
         ReflectionTestUtils.setField(relay, "batchSize", 10);
-        ReflectionTestUtils.setField(relay, "maxRetries", 3);
         OutboxEvent event = pendingEvent(0);
         when(outboxService.fetchPending(10)).thenReturn(List.of(event));
         doThrow(new RuntimeException("broker down")).when(publisher).publish(event);
@@ -36,16 +44,14 @@ class OutboxRelayTest {
 
         // Then
         verify(outboxService).incrementRetry(event.getId(), "broker down");
-        verify(outboxService, never()).markAsFailed(event.getId());
         verify(outboxService, never()).markAsProcessed(event.getId());
     }
 
     @Test
-    void nthFailureTransitionsToFailed() {
+    void nthFailureOnlyCallsIncrementRetry() {
         // Given
         ReflectionTestUtils.setField(relay, "batchSize", 10);
-        ReflectionTestUtils.setField(relay, "maxRetries", 3);
-        OutboxEvent event = pendingEvent(2); // retryCount = 2, next attempt is 3 >= maxRetries
+        OutboxEvent event = pendingEvent(2);
         when(outboxService.fetchPending(10)).thenReturn(List.of(event));
         doThrow(new RuntimeException("broker down")).when(publisher).publish(event);
 
@@ -54,7 +60,6 @@ class OutboxRelayTest {
 
         // Then
         verify(outboxService).incrementRetry(event.getId(), "broker down");
-        verify(outboxService).markAsFailed(event.getId());
         verify(outboxService, never()).markAsProcessed(event.getId());
     }
 
@@ -62,7 +67,6 @@ class OutboxRelayTest {
     void successfulPublishMarksProcessed() {
         // Given
         ReflectionTestUtils.setField(relay, "batchSize", 10);
-        ReflectionTestUtils.setField(relay, "maxRetries", 3);
         OutboxEvent event = pendingEvent(0);
         when(outboxService.fetchPending(10)).thenReturn(List.of(event));
 
@@ -72,14 +76,5 @@ class OutboxRelayTest {
         // Then
         verify(outboxService).markAsProcessed(event.getId());
         verify(outboxService, never()).incrementRetry(any(), any());
-        verify(outboxService, never()).markAsFailed(any());
-    }
-
-    private OutboxEvent pendingEvent(int retryCount) {
-        OutboxEvent event = new OutboxEvent();
-        ReflectionTestUtils.setField(event, "id", UUID.randomUUID());
-        event.setStatus(OutboxEventStatus.PENDING);
-        event.setRetryCount(retryCount);
-        return event;
     }
 }
