@@ -15,6 +15,7 @@ public interface WalletRepository {
     List<Wallet> findAllByUserId(UUID userId);
     Optional<Wallet> findByIdAndUserIdAndStatus(UUID id, UUID userId, WalletStatus status);
     Optional<Wallet> findByIdAndStatus(UUID id, WalletStatus status);
+    Optional<Wallet> findById(UUID id);
     Wallet save(Wallet wallet);
     void deleteAll();
 }
