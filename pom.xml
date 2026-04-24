@@ -28,9 +28,14 @@
 	</scm>
 	<properties>
 		<java.version>25</java.version>
-            <sonar.coverage.jacoco.xmlReportPaths>
-                ${project.build.directory}/site/jacoco/jacoco.xml
-            </sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.organization>lakiidev</sonar.organization>
+        <sonar.projectKey>lakiidev_payflow</sonar.projectKey>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            ${project.build.directory}/site/jacoco/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            ${project.build.directory}/site/jacoco/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
 	</properties>
 	<dependencies>
@@ -242,22 +247,13 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
+                <version>0.8.14</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                    <execution>
                         <configuration>
                             <excludes>
                                 <exclude>**/config/**</exclude>
@@ -268,16 +264,10 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>prepare-agent-integration</id>
+                        <id>report</id>
+                        <phase>verify</phase>
                         <goals>
-                            <goal>prepare-agent-integration</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report-integration</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>report-integration</goal>
+                            <goal>report</goal>
                         </goals>
                     </execution>
                 </executions>
