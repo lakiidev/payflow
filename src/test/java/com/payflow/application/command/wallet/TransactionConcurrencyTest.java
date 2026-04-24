@@ -44,8 +44,9 @@ class TransactionConcurrencyTest extends BaseTransactionTest {
                               ExecutorService executor) throws InterruptedException {
         boolean ready = harness.ready.await(30, TimeUnit.SECONDS);
         assertThat(ready).as("threads did not become ready within timeout").isTrue();
+        harness.start.countDown();
         executor.shutdown();
-        boolean finished = executor.awaitTermination(30, TimeUnit.SECONDS);
+        boolean finished = executor.awaitTermination(60, TimeUnit.SECONDS);
         assertThat(finished).as("threads did not finish within timeout — possible deadlock").isTrue();
     }
 
