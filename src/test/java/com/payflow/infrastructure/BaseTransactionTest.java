@@ -41,7 +41,7 @@ public abstract class BaseTransactionTest extends BaseIntegrationTest {
                 UUID.randomUUID().toString(), wallet.getId(), user.getId(), amountCents
         ));
     }
-    public Wallet freshWallet() {
+    protected Wallet freshWallet() {
         User receiver = userRepository.save(
                 User.builder()
                         .fullName("Receiver")

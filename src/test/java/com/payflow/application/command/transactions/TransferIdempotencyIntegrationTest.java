@@ -26,14 +26,12 @@ class TransferIdempotencyIntegrationTest extends BaseTransactionTest {
     @Autowired WalletService walletService;
     @Autowired UserRepository userRepository;
 
-    private static final String IDEMPOTENCY_KEY = "idem-transfer-" + UUID.randomUUID();
 
-    private User receiver;
     private Wallet destinationWallet;
 
     @BeforeEach
     void setupSecondWallet() {
-        receiver = userRepository.save(
+        User receiver = userRepository.save(
                 User.builder()
                         .fullName("Receiver")
                         .email("receiver-" + UUID.randomUUID() + "@payflow.com")
@@ -49,8 +47,10 @@ class TransferIdempotencyIntegrationTest extends BaseTransactionTest {
     @Test
     void duplicateTransferWithSameKeyProducesExactlyOneTransactionAndTwoLedgerEntries() {
         // Given
+        String idempotencyKey =  "idem-transfer-" + UUID.randomUUID();
+
         TransferCommandHandler.Command command = new TransferCommandHandler.Command(
-                IDEMPOTENCY_KEY, wallet.getId(), destinationWallet.getId(),
+                idempotencyKey, wallet.getId(), destinationWallet.getId(),
                 user.getId(), 4_000L
         );
 
@@ -61,7 +61,7 @@ class TransferIdempotencyIntegrationTest extends BaseTransactionTest {
         // Then
         assertThat(second.getId()).isEqualTo(first.getId());
 
-        assertThat(transactionRepository.findByIdempotencyKey(IDEMPOTENCY_KEY))
+        assertThat(transactionRepository.findByIdempotencyKey(idempotencyKey))
                 .isPresent()
                 .hasValueSatisfying(tx -> assertThat(tx.getId()).isEqualTo(first.getId()));
 

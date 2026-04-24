@@ -21,13 +21,13 @@ class DepositIdempotencyIntegrationTest extends BaseTransactionTest {
     @Autowired WalletRepository walletRepository;
     @Autowired DepositCommandHandler depositHandler;
 
-    private static final String IDEMPOTENCY_KEY = "idem-deposit-" + UUID.randomUUID();
-
     @Test
     void duplicateDepositWithSameKeyProducesExactlyOneTransactionAndOneLedgerEntry() {
         // Given
+        String idempotencyKey =  "idem-deposit-" + UUID.randomUUID();
+
         DepositCommandHandler.Command command = new DepositCommandHandler.Command(
-                IDEMPOTENCY_KEY, wallet.getId(), user.getId(), 5_000L
+                idempotencyKey, wallet.getId(), user.getId(), 5_000L
         );
 
         // When
@@ -37,7 +37,7 @@ class DepositIdempotencyIntegrationTest extends BaseTransactionTest {
         // Then
         assertThat(second.getId()).isEqualTo(first.getId());
 
-        assertThat(transactionRepository.findByIdempotencyKey(IDEMPOTENCY_KEY))
+        assertThat(transactionRepository.findByIdempotencyKey(idempotencyKey))
                 .isPresent()
                 .hasValueSatisfying(tx -> assertThat(tx.getId()).isEqualTo(first.getId()));
 

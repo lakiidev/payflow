@@ -42,8 +42,8 @@ class TransactionConcurrencyTest extends BaseTransactionTest {
 
     private void awaitAndFire(ConcurrencyHarness harness,
                               ExecutorService executor) throws InterruptedException {
-        harness.ready.await();
-        harness.start.countDown();
+        boolean ready = harness.ready.await(30, TimeUnit.SECONDS);
+        assertThat(ready).as("threads did not become ready within timeout").isTrue();
         executor.shutdown();
         boolean finished = executor.awaitTermination(30, TimeUnit.SECONDS);
         assertThat(finished).as("threads did not finish within timeout — possible deadlock").isTrue();
@@ -80,7 +80,12 @@ class TransactionConcurrencyTest extends BaseTransactionTest {
         awaitAndFire(h, exec);
 
         // Then
+        assertThat(successful)
+                .as("at least one deposit must succeed")
+                .isNotEmpty();
+
         Wallet current = walletRepository.findById(wallet.getId()).orElseThrow();
+
         assertThat(current.getCurrentBalance())
                 .isEqualTo(successful.stream().mapToLong(Long::longValue).sum());
     }
@@ -131,10 +136,14 @@ class TransactionConcurrencyTest extends BaseTransactionTest {
         awaitAndFire(h, exec);
 
         // Then
+        assertThat(successfulDeposits.size() + successfulWithdrawals.size())
+                .as("at least one operation must succeed for the test to be meaningful")
+                .isGreaterThan(0);
         long expectedBalance = initialBalance
                 + successfulDeposits.stream().mapToLong(Long::longValue).sum()
                 - successfulWithdrawals.stream().mapToLong(Long::longValue).sum();
 
+        assertThat(successfulDeposits).as("at least one deposit must succeed").isNotEmpty();
         Wallet current = walletRepository.findById(wallet.getId()).orElseThrow();
         assertThat(current.getCurrentBalance())
                 .isGreaterThanOrEqualTo(0L)
@@ -181,6 +190,8 @@ class TransactionConcurrencyTest extends BaseTransactionTest {
         awaitAndFire(h, exec);
 
         // Then
+        assertThat(successfulTransfers).as("at least one transfer must succeed for the test to be meaningful").isNotEmpty();
+
         long totalTransferred = successfulTransfers.stream().mapToLong(Long::longValue).sum();
         Wallet currentSource = walletRepository.findById(wallet.getId()).orElseThrow();
         Wallet currentDestination = walletRepository.findById(destination.getId()).orElseThrow();

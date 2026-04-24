@@ -15,20 +15,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 class WithdrawIdempotencyIntegrationTest extends BaseTransactionTest {
 
     @Autowired WithdrawCommandHandler withdrawHandler;
-    @Autowired DepositCommandHandler depositHandler;
     @Autowired TransactionRepository transactionRepository;
     @Autowired LedgerEntryRepository ledgerRepository;
     @Autowired WalletService walletService;
-
-    private static final String IDEMPOTENCY_KEY = "idem-withdraw-" + UUID.randomUUID();
 
 
     @Test
     void duplicateWithdrawWithSameKeyProducesExactlyOneTransactionAndOneLedgerEntry() {
         // Given
         seedBalance(10_000L);
+        String idempotencyKey =  "idem-withdraw-" + UUID.randomUUID();
         WithdrawCommandHandler.Command command = new WithdrawCommandHandler.Command(
-                IDEMPOTENCY_KEY, wallet.getId(), user.getId(), 3_000L
+                idempotencyKey, wallet.getId(), user.getId(), 3_000L
         );
 
         // When
@@ -38,7 +36,7 @@ class WithdrawIdempotencyIntegrationTest extends BaseTransactionTest {
         // Then
         assertThat(second.getId()).isEqualTo(first.getId());
 
-        assertThat(transactionRepository.findByIdempotencyKey(IDEMPOTENCY_KEY))
+        assertThat(transactionRepository.findByIdempotencyKey(idempotencyKey))
                 .isPresent()
                 .hasValueSatisfying(tx -> assertThat(tx.getId()).isEqualTo(first.getId()));
 

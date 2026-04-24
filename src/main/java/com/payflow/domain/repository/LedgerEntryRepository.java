@@ -7,6 +7,6 @@ import java.util.UUID;
 
 public interface LedgerEntryRepository {
     LedgerEntry save(LedgerEntry ledgerEntry);
-    List<LedgerEntry> findAllByTransactionId(UUID walletId);
+    List<LedgerEntry> findAllByTransactionId(UUID transactionId);
     void deleteAll();
 }
