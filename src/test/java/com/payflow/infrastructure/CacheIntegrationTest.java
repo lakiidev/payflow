@@ -72,10 +72,9 @@ class CacheIntegrationTest extends BaseIntegrationTest {
     void getActiveByIdFirstCallPopulatesCache() {
         transactionTemplate.execute(status -> {
             walletService.getActiveById(walletId, userId);
+            assertNotNull(cacheManager.getCache("wallets").get(walletId + ":" + userId));
             return null;
         });
-
-        assertNotNull(cacheManager.getCache("wallets").get(walletId + ":" + userId));
     }
 
     @Test
