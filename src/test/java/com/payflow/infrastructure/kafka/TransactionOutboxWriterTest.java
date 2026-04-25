@@ -1,9 +1,7 @@
 package com.payflow.infrastructure.kafka;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import com.payflow.domain.model.outbox.OutboxEvent;
 import com.payflow.domain.model.outbox.OutboxEventStatus;
 import com.payflow.domain.model.transaction.Transaction;
@@ -37,7 +35,7 @@ class TransactionOutboxWriterTest {
     @BeforeEach
     void setUp() {
         // real ObjectMapper so serialization is actually exercised
-        ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        ObjectMapper objectMapper = new ObjectMapper();
         writer = new TransactionOutboxWriter(outboxRepository, objectMapper);
     }
 
@@ -64,7 +62,7 @@ class TransactionOutboxWriterTest {
     }
 
     @Test
-    void shouldSerializePayloadAsValidJson() throws Exception {
+    void shouldSerializePayloadAsValidJson(){
         // Given
         Transaction tx = Transaction.create("idem-key-1", TransactionType.DEPOSIT,
                 null, WALLET_ID, 5000L, EUR, USER_ID);
@@ -77,7 +75,7 @@ class TransactionOutboxWriterTest {
         ArgumentCaptor<OutboxEvent> captor = ArgumentCaptor.forClass(OutboxEvent.class);
         verify(outboxRepository).save(captor.capture());
 
-        ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        ObjectMapper mapper = new ObjectMapper();
         TransactionOutboxWriter.TransactionCreatedPayload payload = mapper.readValue(
                 captor.getValue().getPayload(),
                 TransactionOutboxWriter.TransactionCreatedPayload.class
@@ -93,8 +91,8 @@ class TransactionOutboxWriterTest {
         // Given — ObjectMapper that always fails
         ObjectMapper broken = new ObjectMapper() {
             @Override
-            public String writeValueAsString(Object value) throws com.fasterxml.jackson.core.JsonProcessingException {
-                throw new JsonGenerationException("forced failure", (JsonGenerator) null);
+            public String writeValueAsString(Object value) throws JacksonException {
+                throw new JacksonException("forced failure") {};
             }
         };
         TransactionOutboxWriter brokenWriter = new TransactionOutboxWriter(outboxRepository, broken);

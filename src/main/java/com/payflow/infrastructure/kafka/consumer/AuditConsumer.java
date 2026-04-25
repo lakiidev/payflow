@@ -1,7 +1,7 @@
 package com.payflow.infrastructure.kafka.consumer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import com.payflow.domain.model.audit.AuditLog;
 import com.payflow.domain.model.event.ProcessedEvent;
 import com.payflow.infrastructure.persistence.jpa.AuditLogRepository;
@@ -52,7 +52,7 @@ public class AuditConsumer {
                     .processedAt(Instant.now())
                     .build());
 
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Failed to deserialize payload", e);
         }
     }

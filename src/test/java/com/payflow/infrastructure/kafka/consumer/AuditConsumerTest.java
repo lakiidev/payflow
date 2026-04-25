@@ -1,7 +1,6 @@
 package com.payflow.infrastructure.kafka.consumer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.ObjectMapper;
 import com.payflow.domain.model.audit.AuditLog;
 import com.payflow.domain.model.event.ProcessedEvent;
 import com.payflow.infrastructure.persistence.jpa.AuditLogRepository;
@@ -12,7 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.UUID;
 
@@ -24,7 +22,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class AuditConsumerTest {
 
-    @Mock private TransactionTemplate transactionTemplate;
     @Mock private ProcessedEventRepository processedEventRepository;
     @Mock private AuditLogRepository auditLogRepository;
 
@@ -38,7 +35,7 @@ class AuditConsumerTest {
 
     @BeforeEach
     void setUp() {
-        ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        ObjectMapper objectMapper = new ObjectMapper();
         consumer = new AuditConsumer(processedEventRepository, auditLogRepository, objectMapper);
 
         validPayload = """

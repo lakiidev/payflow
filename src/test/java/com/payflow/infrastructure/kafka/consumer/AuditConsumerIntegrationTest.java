@@ -1,7 +1,5 @@
 package com.payflow.infrastructure.kafka.consumer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.payflow.BaseIntegrationTest;
 import com.payflow.domain.model.audit.AuditLog;
 import com.payflow.domain.model.transaction.TransactionType;
@@ -13,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
 import java.util.Currency;
@@ -22,19 +21,19 @@ import java.util.UUID;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+
 @Slf4j
 class AuditConsumerIntegrationTest extends BaseIntegrationTest {
 
     @Autowired private KafkaTemplate<String, String> kafkaTemplate;
     @Autowired private AuditLogRepository auditLogRepository;
     @Autowired private ProcessedEventRepository processedEventRepository;
+    @Autowired private ObjectMapper mapper;
 
     @Value("${payflow.kafka.topics.transactions}")
     private String transactionsTopic;
 
-    private static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
     private static final Currency EUR = Currency.getInstance("EUR");
-
 
     @Test
     void shouldWriteAuditLogAndMarkEventProcessedWhenTransactionEventReceived() throws Exception {
@@ -64,15 +63,14 @@ class AuditConsumerIntegrationTest extends BaseIntegrationTest {
 
         kafkaTemplate.send(transactionsTopic, eventId.toString(), payload).get();
 
-        // wait long enough for a reprocessing attempt, assert still only 1
         await().atMost(15, SECONDS).untilAsserted(() -> {
             assertThat(auditLogRepository.findByEntityTypeAndEntityId("Transaction", eventId)).hasSize(1);
             assertThat(processedEventRepository.existsByIdEventIdAndIdConsumerGroup(eventId, "audit")).isTrue();
         });
     }
 
-    private static String serialize(UUID eventId) throws Exception {
-        return MAPPER.writeValueAsString(new TransactionCreatedPayload(
+    private String serialize(UUID eventId) {
+        return mapper.writeValueAsString(new TransactionCreatedPayload(
                 eventId,
                 TransactionType.DEPOSIT,
                 null,

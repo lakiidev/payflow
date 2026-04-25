@@ -1,7 +1,7 @@
 package com.payflow.infrastructure.kafka;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import com.payflow.domain.model.outbox.OutboxEvent;
 import com.payflow.domain.model.outbox.OutboxEventStatus;
 import com.payflow.domain.model.transaction.Transaction;
@@ -50,7 +50,7 @@ public class TransactionOutboxWriter {
         try {
             return objectMapper.writeValueAsString(payload);
         }
-        catch (JsonProcessingException e)
+        catch (JacksonException e)
         {
             throw new IllegalStateException("Failed to serialize outbox payload: " + payload.getClass().getSimpleName(), e);
         }
