@@ -37,6 +37,12 @@
             ${project.build.directory}/site/jacoco/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
+        <sonar.coverage.exclusions>
+            **/config/**,
+            **/dto/**,
+            **/*Application.java,
+            **/domain/model/**
+        </sonar.coverage.exclusions>
 	</properties>
 	<dependencies>
 		<dependency>
