@@ -20,22 +20,23 @@ public class TransactionOutboxWriter {
     private final OutboxRepository outboxRepository;
     private final ObjectMapper objectMapper;
 
-    public void publishTransactionCreated(Transaction tx)
+    public void publishTransactionCreated(Transaction tx, UUID userId)
     {
         OutboxEvent event =  OutboxEvent.builder()
                 .aggregateId(tx.getId())
                 .aggregateType(tx.getClass().getSimpleName())
                 .eventType("TransactionCreated")
-                .payload(serialize(toPayload(tx)))
+                .payload(serialize(toPayload(tx, userId)))
                 .status(OutboxEventStatus.PENDING)
                 .build();
         outboxRepository.save(event);
     }
 
-    private TransactionCreatedPayload toPayload(Transaction tx)
+    private TransactionCreatedPayload toPayload(Transaction tx, UUID userId)
     {
         return new TransactionCreatedPayload(
                 tx.getId(),
+                userId,
                 tx.getType(),
                 tx.getFromWalletId(),
                 tx.getToWalletId(),
@@ -58,6 +59,7 @@ public class TransactionOutboxWriter {
 
     public record TransactionCreatedPayload(
             UUID transactionId,
+            UUID userId,
             TransactionType type,
             UUID fromWalletId,
             UUID toWalletId,

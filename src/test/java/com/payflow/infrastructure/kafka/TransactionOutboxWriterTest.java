@@ -47,7 +47,7 @@ class TransactionOutboxWriterTest {
         tx.complete();
 
         // When
-        writer.publishTransactionCreated(tx);
+        writer.publishTransactionCreated(tx, USER_ID);
 
         // Then
         ArgumentCaptor<OutboxEvent> captor = ArgumentCaptor.forClass(OutboxEvent.class);
@@ -69,7 +69,7 @@ class TransactionOutboxWriterTest {
         tx.complete();
 
         // When
-        writer.publishTransactionCreated(tx);
+        writer.publishTransactionCreated(tx, USER_ID);
 
         // Then
         ArgumentCaptor<OutboxEvent> captor = ArgumentCaptor.forClass(OutboxEvent.class);
@@ -100,7 +100,7 @@ class TransactionOutboxWriterTest {
                 null, WALLET_ID, 5000L, EUR, USER_ID);
 
         // When / Then
-        assertThatThrownBy(() -> brokenWriter.publishTransactionCreated(tx))
+        assertThatThrownBy(() -> brokenWriter.publishTransactionCreated(tx, USER_ID))
                 .isInstanceOf(IllegalStateException.class);
     }
 }

@@ -85,7 +85,7 @@ class DepositCommandHandlerTest {
                 .createCreditEntry(any(Transaction.class), eq(wallet),
                         eq(3000L));
         verify(eventPublisher)
-                .publishTransactionCreated(any(Transaction.class));
+                .publishTransactionCreated(any(Transaction.class),eq(USER_ID));
     }
 
     @Test

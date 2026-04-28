@@ -8,7 +8,6 @@ import com.payflow.domain.model.transaction.Transaction;
 import com.payflow.domain.model.transaction.TransactionType;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.domain.repository.TransactionRepository;
-import com.payflow.domain.repository.WalletRepository;
 import com.payflow.infrastructure.kafka.TransactionOutboxWriter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.PessimisticLockingFailureException;
@@ -26,7 +25,6 @@ import java.util.UUID;
 public class WithdrawCommandHandler {
 
     private final WalletService walletService;
-    private final WalletRepository walletRepository;
 
     public record Command(
             String idempotencyKey,
@@ -93,7 +91,7 @@ public class WithdrawCommandHandler {
 
         // STEP 7: Mark complete and persist
         tx.complete();
-        eventPublisher.publishTransactionCreated(tx);
+        eventPublisher.publishTransactionCreated(tx,wallet.getUserId());
         return transactionRepository.save(tx);
     }
 }

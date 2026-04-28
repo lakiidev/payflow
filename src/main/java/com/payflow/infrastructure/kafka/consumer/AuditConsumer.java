@@ -41,6 +41,7 @@ public class AuditConsumer {
             auditLogRepository.save(AuditLog.builder()
                     .action(event.type().name())
                     .entityType("Transaction")
+                    .userId(event.userId())
                     .entityId(event.transactionId())
                     .build());
 

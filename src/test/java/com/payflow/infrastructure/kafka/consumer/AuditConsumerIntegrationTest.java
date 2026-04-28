@@ -1,12 +1,19 @@
 package com.payflow.infrastructure.kafka.consumer;
 
-import com.payflow.BaseIntegrationTest;
+import com.payflow.application.service.WalletService;
 import com.payflow.domain.model.audit.AuditLog;
 import com.payflow.domain.model.transaction.TransactionType;
+import com.payflow.domain.model.user.User;
+import com.payflow.domain.model.wallet.Wallet;
+import com.payflow.infrastructure.BaseTransactionTest;
 import com.payflow.infrastructure.kafka.TransactionOutboxWriter.TransactionCreatedPayload;
 import com.payflow.infrastructure.persistence.jpa.AuditLogRepository;
 import com.payflow.infrastructure.persistence.jpa.ProcessedEventRepository;
+import com.payflow.infrastructure.persistence.jpa.UserJpaRepository;
+import com.payflow.infrastructure.persistence.jpa.WalletJpaRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,29 +30,63 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 @Slf4j
-class AuditConsumerIntegrationTest extends BaseIntegrationTest {
+class AuditConsumerIntegrationTest extends BaseTransactionTest {
 
     @Autowired private KafkaTemplate<String, String> kafkaTemplate;
     @Autowired private AuditLogRepository auditLogRepository;
     @Autowired private ProcessedEventRepository processedEventRepository;
+    @Autowired private WalletJpaRepository walletRepository;
     @Autowired private ObjectMapper mapper;
+    @Autowired private UserJpaRepository userRepository;
+    @Autowired private WalletService walletService;
 
     @Value("${payflow.kafka.topics.transactions}")
     private String transactionsTopic;
 
     private static final Currency EUR = Currency.getInstance("EUR");
 
+
+    private UUID userId;
+    private UUID walletId;
+
+    @BeforeEach
+    void setUp() {
+        user = userRepository.save(
+                User.builder()
+                        .fullName("Audit Test User")
+                        .email("audit-test-" + UUID.randomUUID() + "@payflow.com")
+                        .passwordHash("some-hash")
+                        .build()
+        );
+        wallet = walletService.save(
+                Wallet.create(user.getId(), Currency.getInstance("EUR"))
+        );
+        userId = user.getId();
+        walletId = wallet.getId();
+    }
+
+    @AfterEach
+    void tearDown() {
+        auditLogRepository.deleteAll();
+        walletRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
     @Test
     void shouldWriteAuditLogAndMarkEventProcessedWhenTransactionEventReceived() throws Exception {
+        // Given
         UUID eventId = UUID.randomUUID();
 
+        // When
         kafkaTemplate.send(transactionsTopic, eventId.toString(), serialize(eventId)).get();
 
+        // Then
         await().atMost(15, SECONDS).untilAsserted(() -> {
             List<AuditLog> logs = auditLogRepository.findByEntityTypeAndEntityId("Transaction", eventId);
             assertThat(logs).hasSize(1);
             assertThat(logs.getFirst().getAction()).isEqualTo("DEPOSIT");
             assertThat(logs.getFirst().getEntityId()).isEqualTo(eventId);
+            assertThat(logs.getFirst().getUserId()).isNotNull();
         });
 
         assertThat(processedEventRepository.existsByIdEventIdAndIdConsumerGroup(eventId, "audit")).isTrue();
@@ -53,9 +94,11 @@ class AuditConsumerIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void shouldNotWriteDuplicateAuditLogWhenSameEventDeliveredTwice() throws Exception {
+        // Given
         UUID eventId = UUID.randomUUID();
         String payload = serialize(eventId);
 
+        // When
         kafkaTemplate.send(transactionsTopic, eventId.toString(), payload).get();
 
         await().atMost(15, SECONDS).untilAsserted(() ->
@@ -63,6 +106,7 @@ class AuditConsumerIntegrationTest extends BaseIntegrationTest {
 
         kafkaTemplate.send(transactionsTopic, eventId.toString(), payload).get();
 
+        // Then
         await().atMost(15, SECONDS).untilAsserted(() -> {
             assertThat(auditLogRepository.findByEntityTypeAndEntityId("Transaction", eventId)).hasSize(1);
             assertThat(processedEventRepository.existsByIdEventIdAndIdConsumerGroup(eventId, "audit")).isTrue();
@@ -72,9 +116,10 @@ class AuditConsumerIntegrationTest extends BaseIntegrationTest {
     private String serialize(UUID eventId) {
         return mapper.writeValueAsString(new TransactionCreatedPayload(
                 eventId,
+                userId,      // real user ID from DB
                 TransactionType.DEPOSIT,
                 null,
-                UUID.randomUUID(),
+                walletId,    // real wallet ID from DB
                 5000L,
                 EUR,
                 Instant.now()

@@ -60,8 +60,8 @@ class TransferCommandHandlerTest {
     private static final Currency EUR   = Currency.getInstance("EUR");
     private static final Currency GBP   = Currency.getInstance("GBP");
 
-    private TransferCommandHandler.Command command(UUID sourceId, UUID destId, long amountCents) {
-        return new TransferCommandHandler.Command("idem-key-1", sourceId, destId, USER_ID, amountCents);
+    private TransferCommandHandler.Command command(UUID destId, long amountCents) {
+        return new TransferCommandHandler.Command("idem-key-1", TransferCommandHandlerTest.SOURCE_ID, destId, USER_ID, amountCents);
     }
 
     private Wallet wallet(UUID userId, Currency currency, long balance) {
@@ -84,7 +84,7 @@ class TransferCommandHandlerTest {
         when(transactionRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         // When
-        Transaction result = handler.handle(command(SOURCE_ID, DEST_ID, 3000L));
+        Transaction result = handler.handle(command(DEST_ID, 3000L));
 
         // Then
         assertThat(result.getStatus()).isEqualTo(TransactionStatus.SUCCESS);
@@ -96,7 +96,7 @@ class TransferCommandHandlerTest {
         assertThat(dest.getCurrentBalance()).isEqualTo(8_000L);
         verify(ledgerService).createDebitEntry(any(Transaction.class), eq(source), eq(3000L));
         verify(ledgerService).createCreditEntry(any(Transaction.class), eq(dest), eq(3000L));
-        verify(eventPublisher).publishTransactionCreated(any(Transaction.class));
+        verify(eventPublisher).publishTransactionCreated(any(Transaction.class),eq(USER_ID));
     }
 
 
@@ -111,7 +111,7 @@ class TransferCommandHandlerTest {
         when(idempotencyService.findDuplicate("idem-key-1")).thenReturn(Optional.of(existing));
 
         // When
-        Transaction result = handler.handle(command(SOURCE_ID, DEST_ID, 3000L));
+        Transaction result = handler.handle(command(DEST_ID, 3000L));
 
         // Then
         assertThat(result).isSameAs(existing);
@@ -125,7 +125,7 @@ class TransferCommandHandlerTest {
         when(idempotencyService.findDuplicate(any())).thenReturn(Optional.empty());
 
         // When / Then
-        var command = command(SOURCE_ID, SOURCE_ID, 3000L);
+        var command = command(SOURCE_ID, 3000L);
         assertThatThrownBy(() -> handler.handle(command))
                 .isInstanceOf(InvalidWalletOperationException.class);
 
@@ -144,7 +144,7 @@ class TransferCommandHandlerTest {
         when(walletRepository.findByIdAndStatus(DEST_ID, WalletStatus.ACTIVE)).thenReturn(Optional.of(dest));
 
         // When / Then
-        var command = command(SOURCE_ID, DEST_ID, 3000L);
+        var command = command(DEST_ID, 3000L);
         assertThatThrownBy(() -> handler.handle(command))
                 .isInstanceOf(CurrencyMismatchException.class);
 
@@ -162,7 +162,7 @@ class TransferCommandHandlerTest {
         when(walletRepository.findByIdAndStatus(DEST_ID, WalletStatus.ACTIVE)).thenReturn(Optional.empty());
 
         // When / Then
-        var command = command(SOURCE_ID, DEST_ID, 3000L);
+        var command = command(DEST_ID, 3000L);
         assertThatThrownBy(() -> handler.handle(command))
                 .isInstanceOf(WalletNotFoundException.class);
 
@@ -179,7 +179,7 @@ class TransferCommandHandlerTest {
         when(walletService.getActiveById(SOURCE_ID, USER_ID)).thenReturn(source);
         when(walletRepository.findByIdAndStatus(DEST_ID, WalletStatus.ACTIVE)).thenReturn(Optional.of(dest));
 
-        var command = command(SOURCE_ID, DEST_ID, 10_001L);
+        var command = command(DEST_ID, 10_001L);
         assertThatThrownBy(() -> handler.handle(command))
                 .isInstanceOf(InsufficientBalanceException.class);
         verifyNoInteractions(ledgerService, eventPublisher, transactionRepository);

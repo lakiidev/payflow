@@ -71,7 +71,7 @@ public class TransferCommandHandler {
             throw new InvalidWalletOperationException(command.sourceWalletId());
         }
 
-        // STEP 3: Load both wallets — only source needs ownership check
+        // STEP 3: Load both wallets — only a source needs ownership check
         Wallet sourceWallet = walletService.getActiveById(command.sourceWalletId(), command.requestingUserId());
         Wallet destinationWallet = walletRepository.findByIdAndStatus(command.destinationWalletId(), WalletStatus.ACTIVE)
                 .orElseThrow(() -> new WalletNotFoundException(command.destinationWalletId()));
@@ -106,7 +106,7 @@ public class TransferCommandHandler {
 
         // STEP 8: Mark complete and persist
         tx.complete();
-        eventPublisher.publishTransactionCreated(tx);
+        eventPublisher.publishTransactionCreated(tx,sourceWallet.getUserId());
         return transactionRepository.save(tx);
     }
 }
