@@ -4,10 +4,7 @@ import com.payflow.domain.model.audit.AuditLog;
 import com.payflow.domain.model.transaction.TransactionType;
 import com.payflow.infrastructure.BaseTransactionTest;
 import com.payflow.infrastructure.kafka.TransactionOutboxWriter.TransactionCreatedPayload;
-import com.payflow.infrastructure.persistence.jpa.AuditLogRepository;
-import com.payflow.infrastructure.persistence.jpa.ProcessedEventRepository;
-import com.payflow.infrastructure.persistence.jpa.UserJpaRepository;
-import com.payflow.infrastructure.persistence.jpa.WalletJpaRepository;
+import com.payflow.infrastructure.persistence.jpa.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +32,7 @@ class AuditConsumerIntegrationTest extends BaseTransactionTest {
     @Autowired private WalletJpaRepository walletRepository;
     @Autowired private ObjectMapper mapper;
     @Autowired private UserJpaRepository userRepository;
-
+    @Autowired private OutboxJpaRepository outboxRepository;
     @Value("${payflow.kafka.topics.transactions}")
     private String transactionsTopic;
 
@@ -54,8 +51,6 @@ class AuditConsumerIntegrationTest extends BaseTransactionTest {
     @AfterEach
     void tearDown() {
         auditLogRepository.deleteAll();
-        walletRepository.deleteAll();
-        userRepository.deleteAll();
     }
 
     @Test

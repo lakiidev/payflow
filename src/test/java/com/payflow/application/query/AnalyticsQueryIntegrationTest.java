@@ -98,7 +98,7 @@ class AnalyticsQueryIntegrationTest extends BaseIntegrationTest {
 
         // Then — one bucket for today, last balance is 7000
         assertThat(result).hasSize(1);
-        assertThat(result.getFirst().lastBalance()).isEqualTo(7000L);
+        assertThat(result.getFirst().lastBalanceCents()).isEqualTo(7000L);
     }
 
     @Test
