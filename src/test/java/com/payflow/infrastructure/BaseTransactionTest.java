@@ -5,7 +5,11 @@ import com.payflow.application.command.transactions.DepositCommandHandler;
 import com.payflow.application.service.WalletService;
 import com.payflow.domain.model.user.User;
 import com.payflow.domain.model.wallet.Wallet;
-import com.payflow.domain.repository.UserRepository;
+import com.payflow.domain.repository.LedgerEntryRepository;
+import com.payflow.domain.repository.WalletRepository;
+import com.payflow.infrastructure.persistence.jpa.TransactionJpaRepository;
+import com.payflow.infrastructure.persistence.jpa.UserJpaRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -15,11 +19,19 @@ import java.util.UUID;
 public abstract class BaseTransactionTest extends BaseIntegrationTest {
 
     @Autowired
-    UserRepository userRepository;
+    UserJpaRepository userRepository;
     @Autowired
     WalletService walletService;
     @Autowired
     DepositCommandHandler depositHandler;
+
+    @Autowired
+    LedgerEntryRepository ledgerEntryRepository;
+    @Autowired
+    TransactionJpaRepository transactionRepository;
+    @Autowired
+    WalletRepository walletRepository;
+
 
     protected User user;
     protected Wallet wallet;
@@ -35,6 +47,14 @@ public abstract class BaseTransactionTest extends BaseIntegrationTest {
         );
         wallet = walletService.save(Wallet.create(user.getId(), Currency.getInstance("GBP")));
     }
+    @AfterEach
+    void tearDown() {
+        ledgerEntryRepository.deleteAll();
+        transactionRepository.deleteAll();
+        walletRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
 
     protected void seedBalance(long amountCents) {
         depositHandler.handle(new DepositCommandHandler.Command(
