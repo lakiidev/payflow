@@ -87,7 +87,7 @@ class WithdrawCommandHandlerTest {
         assertThat(result.getAmount()).isEqualTo(3000L);
         assertThat(wallet.getCurrentBalance()).isEqualTo(7_000L);
         verify(ledgerService).createDebitEntry(any(Transaction.class), eq(wallet), eq(3000L));
-        verify(eventPublisher).publishTransactionCreated(any(Transaction.class));
+        verify(eventPublisher).publishTransactionCreated(any(Transaction.class),eq(USER_ID));
     }
 
 

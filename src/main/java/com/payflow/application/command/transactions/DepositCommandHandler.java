@@ -7,7 +7,6 @@ import com.payflow.domain.model.transaction.Transaction;
 import com.payflow.domain.model.transaction.TransactionType;
 import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.domain.repository.TransactionRepository;
-import com.payflow.domain.repository.WalletRepository;
 import com.payflow.infrastructure.kafka.TransactionOutboxWriter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.PessimisticLockingFailureException;
@@ -43,7 +42,6 @@ public class DepositCommandHandler {
     private final TransactionRepository transactionRepository;
     private final LedgerService ledgerService;
     private final TransactionOutboxWriter eventPublisher;
-    private final WalletRepository walletRepository;
 
     @Retryable(
             retryFor = {ObjectOptimisticLockingFailureException.class,PessimisticLockingFailureException .class},
@@ -88,7 +86,7 @@ public class DepositCommandHandler {
 
         // STEP 7: Mark complete and persist
         tx.complete();
-        eventPublisher.publishTransactionCreated(tx);
+        eventPublisher.publishTransactionCreated(tx,wallet.getUserId());
         return transactionRepository.save(tx);
     }
 }

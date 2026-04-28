@@ -1,7 +1,10 @@
 package com.payflow;
 
+import org.junit.jupiter.api.AfterEach;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -15,7 +18,13 @@ import org.testcontainers.utility.DockerImageName;
 @Import(TestcontainersConfiguration.class)
 @AutoConfigureRestTestClient
 public abstract class BaseIntegrationTest {
-
+    @Autowired
+    protected CacheManager cacheManager;
+    @AfterEach
+    void clearCache() {
+        cacheManager.getCacheNames()
+                .forEach(name -> cacheManager.getCache(name).clear());
+    }
     static final PostgreSQLContainer postgres;
 
     static {
@@ -35,4 +44,6 @@ public abstract class BaseIntegrationTest {
         registry.add("spring.datasource.read.username", postgres::getUsername);
         registry.add("spring.datasource.read.password", postgres::getPassword);
     }
+
+
 }

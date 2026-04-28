@@ -26,6 +26,9 @@ public class AuditLog {
     private UUID id;
 
     @Column
+    private UUID walletId;
+
+    @Column
     private UUID userId;
 
     @Column(nullable = false, length = 100)
