@@ -1,10 +1,7 @@
 package com.payflow.infrastructure.kafka.consumer;
 
-import com.payflow.application.service.WalletService;
 import com.payflow.domain.model.audit.AuditLog;
 import com.payflow.domain.model.transaction.TransactionType;
-import com.payflow.domain.model.user.User;
-import com.payflow.domain.model.wallet.Wallet;
 import com.payflow.infrastructure.BaseTransactionTest;
 import com.payflow.infrastructure.kafka.TransactionOutboxWriter.TransactionCreatedPayload;
 import com.payflow.infrastructure.persistence.jpa.AuditLogRepository;
@@ -38,7 +35,6 @@ class AuditConsumerIntegrationTest extends BaseTransactionTest {
     @Autowired private WalletJpaRepository walletRepository;
     @Autowired private ObjectMapper mapper;
     @Autowired private UserJpaRepository userRepository;
-    @Autowired private WalletService walletService;
 
     @Value("${payflow.kafka.topics.transactions}")
     private String transactionsTopic;
@@ -51,16 +47,6 @@ class AuditConsumerIntegrationTest extends BaseTransactionTest {
 
     @BeforeEach
     void setUp() {
-        user = userRepository.save(
-                User.builder()
-                        .fullName("Audit Test User")
-                        .email("audit-test-" + UUID.randomUUID() + "@payflow.com")
-                        .passwordHash("some-hash")
-                        .build()
-        );
-        wallet = walletService.save(
-                Wallet.create(user.getId(), Currency.getInstance("EUR"))
-        );
         userId = user.getId();
         walletId = wallet.getId();
     }
