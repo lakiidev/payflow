@@ -32,7 +32,6 @@ public abstract class BaseTransactionTest extends BaseIntegrationTest {
     @Autowired
     WalletRepository walletRepository;
 
-
     protected User user;
     protected Wallet wallet;
 
