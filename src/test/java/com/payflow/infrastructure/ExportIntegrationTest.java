@@ -61,7 +61,7 @@ class ExportIntegrationTest extends BaseTransactionTest {
 
         // When / Then
         restTestClient.get()
-                .uri("/api/v1/analytics/{walletId}/transactions/export?format=PDF&from=2026-01-01T00:00:00Z&to=2026-12-31T23:59:59Z",
+                .uri("/api/v1/analytics/{walletId}/export?format=PDF&from=2026-01-01T00:00:00Z&to=2026-12-31T23:59:59Z",
                         wallet.getId())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .exchange()
@@ -77,7 +77,7 @@ class ExportIntegrationTest extends BaseTransactionTest {
 
         // When / Then
         restTestClient.get()
-                .uri("/api/v1/transactions/{walletId}/transactions/export?format=CSV&from=2026-01-01T00:00:00Z&to=2026-12-31T23:59:59Z",
+                .uri("/api/v1/analytics/{walletId}/export?format=CSV&from=2026-01-01T00:00:00Z&to=2026-12-31T23:59:59Z",
                         wallet.getId())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .exchange()
