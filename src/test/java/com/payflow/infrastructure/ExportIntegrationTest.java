@@ -14,6 +14,8 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 import java.util.Currency;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 class ExportIntegrationTest extends BaseTransactionTest {
 
@@ -67,7 +69,9 @@ class ExportIntegrationTest extends BaseTransactionTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_PDF_VALUE)
-                .expectHeader().valueMatches(HttpHeaders.CONTENT_DISPOSITION, ".*attachment.*");
+                .expectHeader().valueMatches(HttpHeaders.CONTENT_DISPOSITION, ".*attachment.*")
+                .expectBody(byte[].class)
+                .consumeWith(result -> assertThat(result.getResponseBody()).isNotEmpty());
     }
 
     @Test
@@ -83,6 +87,8 @@ class ExportIntegrationTest extends BaseTransactionTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType("text/csv")
-                .expectHeader().valueMatches(HttpHeaders.CONTENT_DISPOSITION, ".*attachment.*");
+                .expectHeader().valueMatches(HttpHeaders.CONTENT_DISPOSITION, ".*attachment.*")
+                .expectBody(byte[].class)
+                .consumeWith(result -> assertThat(result.getResponseBody()).isNotEmpty());
     }
 }
