@@ -91,13 +91,15 @@ public class AnalyticsController {
     @GetMapping(value = "/{walletId}/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<StreamingResponseBody> export(@PathVariable UUID walletId,
                        @RequestParam Instant from,
-                       @RequestParam Instant to,
-                       @RequestParam String format,
+                       @RequestParam(required = false) Instant to,
+                       @RequestParam(required = false) String format,
                        @AuthenticationPrincipal User user,
                        HttpServletResponse response)
     {
+        Instant effectiveFrom = from != null ? from : Instant.EPOCH;
+        Instant effectiveTo = to != null ? to : Instant.now();
         List<TransactionView> transactions = walletStatementQueryHandler.handle(
-                new WalletStatementQueryHandler.Query(user.getId(), walletId, from, to)
+                new WalletStatementQueryHandler.Query(user.getId(), walletId, effectiveFrom, effectiveTo)
         );
 
         ExportFormat exportFormat = ExportFormat.fromString(format);
