@@ -36,13 +36,14 @@ public class PdfStatementAdapter implements PdfExportPort {
     }
 
     private Paragraph header(UUID walletId) {
-        return new Paragraph("PayFlow — Wallet Statement")
-                .setFontSize(18)
-                .simulateBold()
+        return new Paragraph()
                 .setMarginBottom(4)
-                .add(new Paragraph(
-                        "Wallet: "+ walletId.toString()
-                )).setFontSize(10).simulateBold();
+                .add(new Paragraph("PayFlow — Wallet Statement")
+                        .setFontSize(18)
+                        .simulateBold())
+                .add(new Paragraph("Wallet: " + walletId.toString())
+                        .setFontSize(10)
+                        .simulateBold());
     }
 
     private Table transactionTable(List<TransactionView> transactions){
