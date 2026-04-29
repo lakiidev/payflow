@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.io.IOException;
 import java.io.UncheckedIOException;
 
 @RestControllerAdvice
@@ -137,6 +138,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UncheckedIOException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleUncheckedIOException(UncheckedIOException ex) {
+        return new ErrorResponse(
+                "INTERNAL_SERVER_ERROR",
+                "Export failed due to an I/O error"
+        );
+    }
+
+    @ExceptionHandler(IOException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleIOException(IOException ex) {
         return new ErrorResponse(
                 "INTERNAL_SERVER_ERROR",
                 "Export failed due to an I/O error"
