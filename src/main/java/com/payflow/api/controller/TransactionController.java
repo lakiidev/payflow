@@ -100,14 +100,17 @@ public class TransactionController {
 
     @GetMapping(value = "/{walletId}/transactions/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public void export(@PathVariable UUID walletId,
-                       @RequestParam Instant from,
-                       @RequestParam Instant to,
+                       @RequestParam(required = false) Instant from,
+                       @RequestParam(required = false) Instant to,
                        @RequestParam ExportFormat format,
                        @AuthenticationPrincipal User user,
                        HttpServletResponse response) throws IOException
     {
+        Instant effectiveFrom = from != null ? from : Instant.EPOCH;
+        Instant effectiveTo = to != null ? to : Instant.now();
+
         List<TransactionView> transactions = walletStatementQueryHandler.handle(
-                new WalletStatementQueryHandler.Query(user.getId(), walletId, from, to)
+                new WalletStatementQueryHandler.Query(user.getId(), walletId, effectiveFrom, effectiveTo)
         );
 
             if(ExportFormat.PDF.equals(format)) {
