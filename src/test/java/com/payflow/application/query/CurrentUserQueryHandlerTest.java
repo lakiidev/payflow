@@ -18,13 +18,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class GetCurrentUserQueryHandlerTest {
+class CurrentUserQueryHandlerTest {
 
     @Mock
     private UserRepository userRepository;
 
     @InjectMocks
-    private GetCurrentUserQueryHandler handler;
+    private CurrentUserQueryHandler handler;
 
     @Test
     void shouldReturnProfileForAuthenticatedUser() {
@@ -36,7 +36,7 @@ class GetCurrentUserQueryHandlerTest {
                 .build();
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        UserProfileResponse response = handler.handle(new GetCurrentUserQueryHandler.Query(userId));
+        UserProfileResponse response = handler.handle(new CurrentUserQueryHandler.Query(userId));
 
         assertThat(response.email()).isEqualTo("user@payflow.com");
         assertThat(response.fullName()).isEqualTo("Test User");
@@ -46,8 +46,7 @@ class GetCurrentUserQueryHandlerTest {
     void shouldThrowWhenUserNotFound() {
         UUID userId = UUID.randomUUID();
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> handler.handle(new GetCurrentUserQueryHandler.Query(userId)))
+        assertThatThrownBy(() -> handler.handle(new CurrentUserQueryHandler.Query(userId)))
                 .isInstanceOf(UsernameNotFoundException.class);
     }
 }
