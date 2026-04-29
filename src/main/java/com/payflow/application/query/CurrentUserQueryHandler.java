@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class GetCurrentUserQueryHandler {
+public class CurrentUserQueryHandler {
 
     public record Query(java.util.UUID userId) {}
 

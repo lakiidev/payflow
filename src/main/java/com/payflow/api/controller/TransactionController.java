@@ -27,6 +27,7 @@ public class TransactionController {
     private final WithdrawCommandHandler withdrawCommandHandler;
     private final TransferCommandHandler transferCommandHandler;
 
+
     @GetMapping
     public Page<TransactionResponse> getTransactions(Pageable pageable,
                                                      @AuthenticationPrincipal User user) {

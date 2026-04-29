@@ -3,6 +3,7 @@ package com.payflow.infrastructure.persistence.jpa;
 import com.payflow.api.dto.response.BalanceHistoryResponse;
 import com.payflow.api.dto.response.MonthlySummaryResponse;
 import com.payflow.api.dto.response.SpendingByCategoryResponse;
+import com.payflow.application.dto.TransactionView;
 import com.payflow.domain.model.ledger.LedgerEntry;
 import com.payflow.domain.repository.LedgerEntryRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public interface LedgerEntryJpaRepository extends JpaRepository<LedgerEntry, UUID>, LedgerEntryRepository {
 
@@ -69,5 +71,24 @@ public interface LedgerEntryJpaRepository extends JpaRepository<LedgerEntry, UUI
             @Param("walletId") UUID walletId,
             @Param("from")     Instant from,
             @Param("to")       Instant to
+    );
+
+    @Query("""
+        SELECT new com.payflow.application.dto.TransactionView(
+            le.transactionId,
+            le.createdAt,
+            le.entryType,
+            le.amount,
+            le.balanceAfter
+        )
+        FROM LedgerEntry le
+        WHERE le.walletId = :walletId
+          AND le.createdAt BETWEEN :from AND :to
+        ORDER BY le.createdAt
+        """)
+    Stream<TransactionView> findStatementRows(
+            @Param("walletId") UUID walletId,
+            @Param("from") Instant from,
+            @Param("to") Instant to
     );
 }

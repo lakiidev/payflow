@@ -10,7 +10,7 @@ import com.payflow.application.command.auth.LogoutCommandHandler;
 import com.payflow.application.command.auth.RefreshCommandHandler;
 import com.payflow.application.command.auth.RegisterCommandHandler;
 import com.payflow.application.command.auth.LoginCommandHandler;
-import com.payflow.application.query.GetCurrentUserQueryHandler;
+import com.payflow.application.query.CurrentUserQueryHandler;
 import com.payflow.domain.model.user.User;
 import com.payflow.infrastructure.security.JwtService;
 import jakarta.validation.Valid;
@@ -28,7 +28,7 @@ public class AuthController {
     private final LoginCommandHandler authenticationQueryHandler;
     private final LogoutCommandHandler logoutCommandHandler;
     private final RefreshCommandHandler refreshCommandHandler;
-    private final GetCurrentUserQueryHandler getCurrentUserQueryHandler;
+    private final CurrentUserQueryHandler currentUserQueryHandler;
     private final JwtService jwtService;
 
     @PostMapping("/register")
@@ -57,8 +57,8 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<UserProfileResponse> me(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(getCurrentUserQueryHandler.handle(
-                new GetCurrentUserQueryHandler.Query(user.getId())));
+        return ResponseEntity.ok(currentUserQueryHandler.handle(
+                new CurrentUserQueryHandler.Query(user.getId())));
     }
 
     @PostMapping("/logout")
