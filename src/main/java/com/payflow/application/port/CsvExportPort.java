@@ -4,8 +4,8 @@ import com.payflow.application.dto.TransactionView;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
+import java.util.stream.Stream;
 
 public interface CsvExportPort {
-    void writeCsv(List<TransactionView> transactions, OutputStream out) throws IOException;
+    void writeCsv(Stream<TransactionView> transactions, OutputStream out) throws IOException;
 }

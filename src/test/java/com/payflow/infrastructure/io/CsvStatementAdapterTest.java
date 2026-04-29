@@ -8,8 +8,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,7 +20,7 @@ class CsvStatementAdapterTest {
     @Test
     void shouldWriteHeaderAndRowWhenTransactionsPresent() throws IOException {
         // Given
-        List<TransactionView> transactions = List.of(
+        Stream<TransactionView> transactions = Stream.of(
                 new TransactionView(UUID.randomUUID(), Instant.parse("2026-01-01T00:00:00Z"),
                         EntryType.DEBIT, 10050L, 89950L)
         );
@@ -40,7 +40,7 @@ class CsvStatementAdapterTest {
     @Test
     void shouldWriteHeaderOnlyWhenNoTransactions() throws IOException {
         // Given
-        List<TransactionView> transactions = List.of();
+        Stream<TransactionView> transactions = Stream.of();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         // When

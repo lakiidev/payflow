@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public interface LedgerEntryJpaRepository extends JpaRepository<LedgerEntry, UUID>, LedgerEntryRepository {
 
@@ -85,7 +86,7 @@ public interface LedgerEntryJpaRepository extends JpaRepository<LedgerEntry, UUI
           AND le.createdAt BETWEEN :from AND :to
         ORDER BY le.createdAt
         """)
-    List<TransactionView> findStatementRows(
+    Stream<TransactionView> findStatementRows(
             @Param("walletId") UUID walletId,
             @Param("from") Instant from,
             @Param("to") Instant to

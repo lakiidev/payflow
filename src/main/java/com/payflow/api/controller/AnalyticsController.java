@@ -20,12 +20,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/analytics")
@@ -98,7 +98,7 @@ public class AnalyticsController {
     {
         Instant effectiveFrom = from != null ? from : Instant.EPOCH;
         Instant effectiveTo = to != null ? to : Instant.now();
-        List<TransactionView> transactions = walletStatementQueryHandler.handle(
+        Stream<TransactionView> transactions = walletStatementQueryHandler.handle(
                 new WalletStatementQueryHandler.Query(user.getId(), walletId, effectiveFrom, effectiveTo)
         );
 

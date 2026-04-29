@@ -14,9 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 import java.util.Currency;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -53,12 +53,12 @@ class WalletStatementQueryHandlerTest {
     @Test
     void shouldReturnStatementWhenUserOwnsWallet() {
         // Given
-        List<TransactionView> expected = List.of(transactionView);
+        Stream<TransactionView> expected = Stream.of(transactionView);
         when(walletRepository.findById(WALLET_ID)).thenReturn(Optional.of(walletOwnedByUser()));
         when(walletStatementPort.findStatementRows(WALLET_ID, FROM, TO)).thenReturn(expected);
 
         // When
-        List<TransactionView> result = handler.handle(query());
+        Stream<TransactionView> result = handler.handle(query());
 
         // Then
         assertThat(result).isSameAs(expected);

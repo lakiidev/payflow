@@ -24,12 +24,14 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class PdfStatementAdapter implements PdfExportPort {
     @Override
-    public void writePdf(UUID walletId, List<TransactionView> transactions, OutputStream out) {
+    public void writePdf(UUID walletId, Stream<TransactionView> transactions, OutputStream out) {
+        List<TransactionView> rows = transactions.toList();
+
         try (PdfDocument pdf = new PdfDocument(new PdfWriter(out))) {
             Document document = new Document(pdf, PageSize.A4);
             document.add(header(walletId));
-            document.add(transactionTable(transactions));
-            document.add(footer(transactions));
+            document.add(transactionTable(rows));
+            document.add(footer(rows));
         }
     }
 

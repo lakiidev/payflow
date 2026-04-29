@@ -7,15 +7,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Repository
 public class WalletStatement implements WalletStatementPort {
     private final LedgerEntryJpaRepository repository;
     @Override
-    public List<TransactionView> findStatementRows(UUID walletId, Instant from, Instant to) {
+    public Stream<TransactionView> findStatementRows(UUID walletId, Instant from, Instant to) {
         return repository.findStatementRows(walletId, from, to);
     }
 }

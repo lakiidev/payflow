@@ -4,6 +4,7 @@ import com.payflow.application.dto.TransactionView;
 import com.payflow.domain.model.ledger.EntryType;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
@@ -24,7 +25,7 @@ class PdfStatementAdapterTest {
                         EntryType.CREDIT, 5000L, 5000L)
         );
 
-        assertPdfWithTransactions(walletId,transactions);
+        assertPdfWithTransactions(walletId, transactions);
     }
 
     @Test
@@ -38,9 +39,11 @@ class PdfStatementAdapterTest {
 
     private void assertPdfWithTransactions(UUID walletId,List<TransactionView> transactions){
         // When
-        byte[] pdf = adapter.generatePdf(walletId, transactions);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        adapter.writePdf(walletId, transactions.stream(), out);
 
         // Then
+        byte[] pdf = out.toByteArray();
         assertThat(pdf).isNotEmpty();
         assertThat(new String(pdf, StandardCharsets.ISO_8859_1)).startsWith("%PDF");
     }
